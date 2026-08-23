@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>快打磚塊 - Mobile & Desktop Edition</title>
+    <title>快打磚塊 - Mobile Fullscreen 4-Level Edition</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
@@ -14,13 +14,16 @@
             -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
-        body {
-            background: #090a16;
+        html, body {
+            background: #060713;
             margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100dvh;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
             color: #ffffff;
             font-family: 'Outfit', system-ui, -apple-system, sans-serif;
             overflow: hidden;
@@ -28,33 +31,37 @@
         }
         #game-container {
             position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 210, 255, 0.15);
-            background: #000;
             width: 100vw;
+            height: 100dvh;
             height: 100vh;
-            max-width: 440px;
-            max-height: 760px;
+            max-width: 480px;
+            background: #000;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
             display: flex;
             flex-direction: column;
         }
+        @media (max-width: 600px) {
+            #game-container {
+                max-width: 100vw;
+                border-radius: 0;
+            }
+        }
         canvas {
             display: block;
-            background: radial-gradient(circle at center, #1b1947 0%, #08071a 100%);
+            background: radial-gradient(circle at center, #17153a 0%, #060515 100%);
             width: 100%;
             height: 100%;
         }
         #ui-header {
             position: absolute;
-            top: 15px;
-            left: 20px;
-            right: 20px;
+            top: 12px;
+            left: 15px;
+            right: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
             pointer-events: none;
@@ -62,9 +69,9 @@
         }
         .score-box {
             background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            padding: 6px 14px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 6px 12px;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.15);
         }
@@ -72,50 +79,65 @@
             color: #00d2ff;
             font-weight: 800;
         }
+        #level-badge {
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 0 15px rgba(255, 0, 110, 0.4);
+        }
+
+        /* 底部控制區域 (左右按鈕靠螢幕兩邊) */
         #controls {
             position: absolute;
-            bottom: 20px;
+            bottom: 0;
             left: 0;
             right: 0;
-            height: 90px;
+            height: 100px;
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
-            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            padding: 0 20px 15px 20px;
+            pointer-events: none;
             z-index: 5;
         }
         .btn {
-            width: 70px;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
+            width: 72px;
+            height: 72px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 28px;
+            font-size: 32px;
             color: #fff;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5), 0 0 15px rgba(0, 210, 255, 0.2);
             cursor: pointer;
-            transition: transform 0.1s ease, background 0.1s ease;
+            pointer-events: auto;
+            transition: transform 0.1s ease, background 0.1s ease, border-color 0.1s ease;
         }
         .btn:active, .btn.active {
-            background: rgba(0, 210, 255, 0.3);
+            background: rgba(0, 210, 255, 0.35);
             border-color: #00d2ff;
-            transform: scale(0.92);
+            transform: scale(0.9);
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
         }
+
+        /* Overlay 選單與關卡選擇畫面 */
         #overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(8, 7, 26, 0.88);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(6, 7, 19, 0.92);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -123,28 +145,62 @@
             z-index: 10;
             padding: 20px;
             text-align: center;
-            transition: opacity 0.3s ease;
         }
         #overlay h1 {
-            font-size: 42px;
+            font-size: 38px;
             font-weight: 800;
-            margin: 0 0 10px 0;
+            margin: 0 0 5px 0;
             background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+            text-shadow: 0 0 25px rgba(0, 210, 255, 0.4);
         }
         #overlay p {
-            font-size: 16px;
+            font-size: 15px;
             color: #a0a5c0;
-            margin: 0 0 25px 0;
-            line-height: 1.5;
+            margin: 0 0 20px 0;
+            line-height: 1.4;
+        }
+        .level-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+            max-width: 320px;
+            margin-bottom: 20px;
+        }
+        .level-card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            padding: 12px 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .level-card:hover, .level-card.selected {
+            background: rgba(0, 210, 255, 0.2);
+            border-color: #00d2ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 210, 255, 0.3);
+        }
+        .level-card .lvl-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #fff;
+        }
+        .level-card .lvl-desc {
+            font-size: 11px;
+            color: #8fa0c5;
+            margin-top: 4px;
         }
         .start-btn {
             background: linear-gradient(135deg, #00d2ff 0%, #0072ff 100%);
             color: #fff;
             border: none;
-            padding: 14px 36px;
+            padding: 14px 40px;
             font-size: 18px;
             font-weight: 700;
             border-radius: 30px;
@@ -156,14 +212,11 @@
             transform: translateY(-2px);
             box-shadow: 0 12px 30px rgba(0, 210, 255, 0.6);
         }
-        .start-btn:active {
-            transform: translateY(1px);
-        }
         .stats-summary {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
             color: #ffffff;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -172,18 +225,40 @@
 <div id="game-container">
     <div id="ui-header">
         <div class="score-box">分數: <span id="score">0</span></div>
+        <div id="level-badge">關卡 1</div>
         <div class="score-box">最高分: <span id="highscore">0</span></div>
     </div>
     
     <div id="overlay">
         <h1 id="overlay-title">快打磚塊</h1>
-        <p id="overlay-desc">經典打磚塊遊戲 Mobile & Desktop 版<br><span style="font-size: 13px; color: #787f9d;">(鍵盤 ← → / AD 鍵或觸控按鈕控制)</span></p>
+        <p id="overlay-desc">選擇關卡體驗獨特玩法與專屬音效<br><span style="font-size: 12px; color: #787f9d;">(支援觸控長按/點按與鍵盤 AD / ← →)</span></p>
+        
+        <div class="level-grid" id="level-selector">
+            <div class="level-card selected" data-level="1">
+                <div class="lvl-title">LV 1. 經典初階</div>
+                <div class="lvl-desc">標準彩磚 / 溫和節奏</div>
+            </div>
+            <div class="level-card" data-level="2">
+                <div class="lvl-title">LV 2. 疾速雙擊</div>
+                <div class="lvl-desc">強化磚塊 / 疾速球速</div>
+            </div>
+            <div class="level-card" data-level="3">
+                <div class="lvl-title">LV 3. 障礙爆破</div>
+                <div class="lvl-desc">鋼鐵障礙 / 炸彈連爆</div>
+            </div>
+            <div class="level-card" data-level="4">
+                <div class="lvl-title">LV 4. 魔王大戰</div>
+                <div class="lvl-desc">移動 BOSS / 血條機制</div>
+            </div>
+        </div>
+
         <div id="overlay-stats" class="stats-summary" style="display: none;"></div>
         <button id="start-button" class="start-btn">開始遊戲</button>
     </div>
 
     <canvas id="gameCanvas"></canvas>
     
+    <!-- 左右控制按鈕 (分立螢幕右下與左下) -->
     <div id="controls">
         <div class="btn" id="leftBtn">←</div>
         <div class="btn" id="rightBtn">→</div>
@@ -195,6 +270,7 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const highscoreEl = document.getElementById('highscore');
+const levelBadge = document.getElementById('level-badge');
 const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayDesc = document.getElementById('overlay-desc');
@@ -202,13 +278,19 @@ const overlayStats = document.getElementById('overlay-stats');
 const startBtn = document.getElementById('start-button');
 const leftBtn = document.getElementById('leftBtn');
 const rightBtn = document.getElementById('rightBtn');
+const levelCards = document.querySelectorAll('.level-card');
 
 let highscore = parseInt(localStorage.getItem('brick_highscore') || '0', 10);
 highscoreEl.innerText = highscore;
 
+let selectedLevel = 1;
+let currentLevel = 1;
 let dpr = window.devicePixelRatio || 1;
 let width = 0;
 let height = 0;
+
+// 控制區高度 (確保擋板底部高於按鈕)
+const controlsAreaHeight = 100;
 
 function resize() {
     const rect = canvas.getBoundingClientRect();
@@ -224,7 +306,8 @@ function resize() {
     ctx.scale(dpr, dpr);
 
     if (paddle) {
-        paddle.y = height - 70;
+        // 擋板底部嚴格高於方向按鈕
+        paddle.y = height - controlsAreaHeight - paddle.height - 15;
         if (paddle.x > width - paddle.width) {
             paddle.x = Math.max(0, width - paddle.width);
         }
@@ -232,7 +315,7 @@ function resize() {
 }
 window.addEventListener('resize', resize);
 
-// 音效引擎 (Web Audio API)
+// 音效引擎 (Web Audio API - 專屬關卡音效)
 let audioCtx = null;
 function initAudio() {
     if (!audioCtx) {
@@ -260,12 +343,34 @@ function playSound(freq, type, duration, volume = 0.1) {
     } catch(e) {}
 }
 
+function playCustomLevelSound(soundType) {
+    if (soundType === 'brick') {
+        if (currentLevel === 1) playSound(650, 'sine', 0.08, 0.12);
+        else if (currentLevel === 2) playSound(850, 'square', 0.06, 0.1);
+        else if (currentLevel === 3) playSound(450, 'triangle', 0.1, 0.15);
+        else if (currentLevel === 4) playSound(350, 'sawtooth', 0.08, 0.12);
+    } else if (soundType === 'bomb') {
+        playSound(120, 'sawtooth', 0.3, 0.25);
+    } else if (soundType === 'steel') {
+        playSound(200, 'square', 0.05, 0.1);
+    } else if (soundType === 'bossHit') {
+        playSound(180, 'sawtooth', 0.15, 0.2);
+    } else if (soundType === 'paddle') {
+        playSound(440, 'square', 0.08, 0.1);
+    } else if (soundType === 'wall') {
+        playSound(320, 'triangle', 0.05, 0.08);
+    }
+}
+
 // 遊戲變數
 let ball = { x: 0, y: 0, radius: 8, dx: 4, dy: -4, speed: 6 };
 let paddle = { width: 80, height: 12, x: 0, y: 0, color: '#00d2ff', speed: 8 };
 let bricks = [];
-const brickRowCount = 6;
-const brickColumnCount = 5;
+let particles = [];
+let boss = null;
+
+let brickRowCount = 5;
+let brickColumnCount = 5;
 let brickWidth = 0;
 let brickHeight = 20;
 let brickPadding = 8;
@@ -275,15 +380,23 @@ let brickOffsetLeft = 15;
 let score = 0;
 let gameRunning = false;
 let animationId = null;
-let particles = [];
 
-function createParticles(x, y, color) {
-    for (let i = 0; i < 10; i++) {
+// 關卡選擇卡片點擊
+levelCards.forEach(card => {
+    card.addEventListener('click', () => {
+        levelCards.forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedLevel = parseInt(card.dataset.level, 10);
+    });
+});
+
+function createParticles(x, y, color, count = 10) {
+    for (let i = 0; i < count; i++) {
         particles.push({
             x: x,
             y: y,
-            dx: (Math.random() - 0.5) * 6,
-            dy: (Math.random() - 0.5) * 6,
+            dx: (Math.random() - 0.5) * 7,
+            dy: (Math.random() - 0.5) * 7,
             radius: Math.random() * 3 + 1,
             color: color,
             alpha: 1,
@@ -313,42 +426,145 @@ function updateParticles() {
 }
 
 function initGame() {
+    currentLevel = selectedLevel;
+    levelBadge.innerText = `關卡 ${currentLevel}`;
     resize();
     
+    let baseSpeed = 5.5 + (currentLevel - 1) * 0.8;
     ball.x = width / 2;
-    ball.y = height - 120;
+    ball.y = height - controlsAreaHeight - 60;
     let angle = (Math.random() * 0.6 - 0.3) * Math.PI;
-    let baseSpeed = 5.5;
     ball.dx = baseSpeed * Math.sin(angle) || 3;
     if (Math.abs(ball.dx) < 2) ball.dx = ball.dx < 0 ? -2 : 2;
     ball.dy = -Math.abs(baseSpeed * Math.cos(angle));
     
-    paddle.width = Math.min(80, width * 0.25);
+    paddle.width = Math.max(65, Math.min(85, width * 0.22));
     paddle.x = (width - paddle.width) / 2;
-    paddle.y = height - 70;
+    paddle.y = height - controlsAreaHeight - paddle.height - 15;
     
+    brickColumnCount = currentLevel === 2 ? 6 : 5;
+    brickRowCount = currentLevel === 2 ? 6 : (currentLevel === 3 ? 5 : 5);
     brickWidth = (width - (brickOffsetLeft * 2) - (brickPadding * (brickColumnCount - 1))) / brickColumnCount;
     
     bricks = [];
+    boss = null;
     const colors = ['#ff006e', '#fb5607', '#ffbe0b', '#3a86ff', '#8338ec', '#00f5d4'];
-    for (let c = 0; c < brickColumnCount; c++) {
-        bricks[c] = [];
-        for (let r = 0; r < brickRowCount; r++) {
-            bricks[c][r] = {
-                x: c * (brickWidth + brickPadding) + brickOffsetLeft,
-                y: r * (brickHeight + brickPadding) + brickOffsetTop,
-                status: 1,
-                color: colors[r % colors.length]
-            };
+    
+    if (currentLevel === 4) {
+        // Level 4: 魔王大戰 (Boss Ship + Health Bar)
+        boss = {
+            x: width / 2 - 60,
+            y: 75,
+            width: 120,
+            height: 30,
+            hp: 20,
+            maxHp: 20,
+            dx: 2.5,
+            color: '#ff0055'
+        };
+        // Mini shield bricks
+        for (let c = 0; c < brickColumnCount; c++) {
+            bricks[c] = [];
+            for (let r = 0; r < 2; r++) {
+                bricks[c][r] = {
+                    x: c * (brickWidth + brickPadding) + brickOffsetLeft,
+                    y: r * (brickHeight + brickPadding) + 130,
+                    status: 1,
+                    type: 'normal',
+                    hp: 1,
+                    color: '#8338ec'
+                };
+            }
+        }
+    } else {
+        for (let c = 0; c < brickColumnCount; c++) {
+            bricks[c] = [];
+            for (let r = 0; r < brickRowCount; r++) {
+                let type = 'normal';
+                let hp = 1;
+                let color = colors[r % colors.length];
+
+                if (currentLevel === 2) {
+                    // Level 2: 強化磚塊 (需打兩次)
+                    if (r === 0 || r === 1) {
+                        type = 'tough';
+                        hp = 2;
+                        color = '#ff006e';
+                    }
+                } else if (currentLevel === 3) {
+                    // Level 3: 鋼鐵磚與炸彈磚
+                    if (r === 2 && (c === 1 || c === 3)) {
+                        type = 'steel'; // 不可破壞
+                        color = '#718096';
+                    } else if (r === 1 && c === 2) {
+                        type = 'bomb'; // 炸彈磚
+                        color = '#ffbe0b';
+                    }
+                }
+
+                bricks[c][r] = {
+                    x: c * (brickWidth + brickPadding) + brickOffsetLeft,
+                    y: r * (brickHeight + brickPadding) + brickOffsetTop,
+                    status: 1,
+                    type: type,
+                    hp: hp,
+                    color: color
+                };
+            }
         }
     }
+
     score = 0;
     scoreEl.innerText = score;
     particles = [];
 }
 
-// 鍵盤輸入處理
+// 按鈕雙重控制能力：點擊（微移一步）與長按（連續移動）
 const keys = {};
+let tapStep = 22; // 點擊單步移動距離
+
+function handleButtonDown(dir) {
+    initAudio();
+    if (dir === 'left') {
+        paddle.x = Math.max(0, paddle.x - tapStep);
+        keys['ArrowLeft'] = true;
+        leftBtn.classList.add('active');
+    } else if (dir === 'right') {
+        paddle.x = Math.min(width - paddle.width, paddle.x + tapStep);
+        keys['ArrowRight'] = true;
+        rightBtn.classList.add('active');
+    }
+}
+
+function handleButtonUp(dir) {
+    if (dir === 'left') {
+        keys['ArrowLeft'] = false;
+        leftBtn.classList.remove('active');
+    } else if (dir === 'right') {
+        keys['ArrowRight'] = false;
+        rightBtn.classList.remove('active');
+    }
+}
+
+// 觸控事件綁定 (支援長按與點按)
+leftBtn.addEventListener('touchstart', (e) => { e.preventDefault(); handleButtonDown('left'); });
+leftBtn.addEventListener('touchend', (e) => { e.preventDefault(); handleButtonUp('left'); });
+leftBtn.addEventListener('touchcancel', (e) => { e.preventDefault(); handleButtonUp('left'); });
+
+rightBtn.addEventListener('touchstart', (e) => { e.preventDefault(); handleButtonDown('right'); });
+rightBtn.addEventListener('touchend', (e) => { e.preventDefault(); handleButtonUp('right'); });
+rightBtn.addEventListener('touchcancel', (e) => { e.preventDefault(); handleButtonUp('right'); });
+
+// 滑鼠點擊綁定
+leftBtn.addEventListener('mousedown', () => handleButtonDown('left'));
+leftBtn.addEventListener('mouseup', () => handleButtonUp('left'));
+leftBtn.addEventListener('mouseleave', () => handleButtonUp('left'));
+
+rightBtn.addEventListener('mousedown', () => handleButtonDown('right'));
+rightBtn.addEventListener('mouseup', () => handleButtonUp('right'));
+rightBtn.addEventListener('mouseleave', () => handleButtonUp('right'));
+
+// 鍵盤輸入
 window.addEventListener('keydown', (e) => {
     if (['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'].includes(e.code)) {
         keys[e.code] = true;
@@ -360,35 +576,7 @@ window.addEventListener('keyup', (e) => {
     }
 });
 
-// 觸控與按鈕控制處理
-const handleTouchState = (btn, isDown) => {
-    if (btn.id === 'leftBtn') {
-        keys['ArrowLeft'] = isDown;
-        leftBtn.classList.toggle('active', isDown);
-    }
-    if (btn.id === 'rightBtn') {
-        keys['ArrowRight'] = isDown;
-        rightBtn.classList.toggle('active', isDown);
-    }
-};
-
-leftBtn.addEventListener('touchstart', (e) => { e.preventDefault(); handleTouchState(leftBtn, true); });
-leftBtn.addEventListener('touchend', (e) => { e.preventDefault(); handleTouchState(leftBtn, false); });
-leftBtn.addEventListener('touchcancel', (e) => { e.preventDefault(); handleTouchState(leftBtn, false); });
-
-rightBtn.addEventListener('touchstart', (e) => { e.preventDefault(); handleTouchState(rightBtn, true); });
-rightBtn.addEventListener('touchend', (e) => { e.preventDefault(); handleTouchState(rightBtn, false); });
-rightBtn.addEventListener('touchcancel', (e) => { e.preventDefault(); handleTouchState(rightBtn, false); });
-
-leftBtn.addEventListener('mousedown', () => handleTouchState(leftBtn, true));
-leftBtn.addEventListener('mouseup', () => handleTouchState(leftBtn, false));
-leftBtn.addEventListener('mouseleave', () => handleTouchState(leftBtn, false));
-
-rightBtn.addEventListener('mousedown', () => handleTouchState(rightBtn, true));
-rightBtn.addEventListener('mouseup', () => handleTouchState(rightBtn, false));
-rightBtn.addEventListener('mouseleave', () => handleTouchState(rightBtn, false));
-
-// Canvas 直接滑動控制
+// Canvas 直接滑動拖拽
 let isDragging = false;
 canvas.addEventListener('touchstart', (e) => {
     if (!gameRunning) return;
@@ -437,42 +625,96 @@ function gameOver(isWin) {
 
     if (isWin) {
         playSound(600, 'sine', 0.1);
-        setTimeout(() => playSound(800, 'sine', 0.2), 100);
-        overlayTitle.innerText = "🎉 恭喜獲勝！";
-        overlayDesc.innerText = "你清除了所有磚塊！";
+        setTimeout(() => playSound(850, 'sine', 0.25), 100);
+        overlayTitle.innerText = "🎉 關卡通關！";
+        overlayDesc.innerText = `恭喜清除 ${levelBadge.innerText} 所有目標！`;
     } else {
-        playSound(150, 'sawtooth', 0.4);
-        overlayTitle.innerText = "💥 遊戲結束";
-        overlayDesc.innerText = "再接再厲，挑戰更高的分數！";
+        playSound(140, 'sawtooth', 0.4);
+        overlayTitle.innerText = "💥 挑戰失敗";
+        overlayDesc.innerText = "調整節奏，再試一次吧！";
     }
 
     overlayStats.style.display = 'block';
     overlayStats.innerHTML = `本次得分: <span style="color:#00d2ff">${score}</span>`;
-    startBtn.innerText = "再玩一次";
+    startBtn.innerText = isWin && selectedLevel < 4 ? "進入下一關" : "再試一次";
+    
+    if (isWin && selectedLevel < 4) {
+        selectedLevel++;
+        levelCards.forEach(c => c.classList.remove('selected'));
+        document.querySelector(`.level-card[data-level="${selectedLevel}"]`).classList.add('selected');
+    }
     overlay.style.display = 'flex';
 }
 
+function triggerBombExplosion(centerC, centerR) {
+    playCustomLevelSound('bomb');
+    for (let c = Math.max(0, centerC - 1); c <= Math.min(brickColumnCount - 1, centerC + 1); c++) {
+        for (let r = Math.max(0, centerR - 1); r <= Math.min(brickRowCount - 1, centerR + 1); r++) {
+            let target = bricks[c][r];
+            if (target && target.status === 1 && target.type !== 'steel') {
+                target.status = 0;
+                score += 15;
+                createParticles(target.x + brickWidth / 2, target.y + brickHeight / 2, '#ffbe0b', 15);
+            }
+        }
+    }
+    scoreEl.innerText = score;
+}
+
 function collisionDetection() {
-    let totalBricks = brickRowCount * brickColumnCount;
-    let activeBricks = 0;
+    let activeBreakables = 0;
+
+    // Boss Collision
+    if (boss && boss.hp > 0) {
+        if (ball.x + ball.radius > boss.x && ball.x - ball.radius < boss.x + boss.width &&
+            ball.y + ball.radius > boss.y && ball.y - ball.radius < boss.y + boss.height) {
+            ball.dy = -ball.dy;
+            boss.hp--;
+            score += 20;
+            scoreEl.innerText = score;
+            createParticles(ball.x, ball.y, '#ff0055', 12);
+            playCustomLevelSound('bossHit');
+            if (boss.hp <= 0) {
+                gameOver(true);
+                return;
+            }
+        }
+    }
 
     for (let c = 0; c < brickColumnCount; c++) {
+        if (!bricks[c]) continue;
         for (let r = 0; r < brickRowCount; r++) {
             let b = bricks[c][r];
             if (b.status === 1) {
-                activeBricks++;
+                if (b.type !== 'steel') activeBreakables++;
+
                 if (ball.x + ball.radius > b.x && ball.x - ball.radius < b.x + brickWidth && 
                     ball.y + ball.radius > b.y && ball.y - ball.radius < b.y + brickHeight) {
                     
-                    b.status = 0;
                     ball.dy = -ball.dy;
-                    score += 10;
-                    scoreEl.innerText = score;
-                    
-                    createParticles(b.x + brickWidth / 2, b.y + brickHeight / 2, b.color);
-                    playSound(600 + r * 50, 'sine', 0.08);
 
-                    if (activeBricks - 1 === 0) {
+                    if (b.type === 'steel') {
+                        playCustomLevelSound('steel');
+                        createParticles(ball.x, ball.y, '#a0aec0', 5);
+                    } else if (b.type === 'bomb') {
+                        b.status = 0;
+                        triggerBombExplosion(c, r);
+                    } else {
+                        b.hp--;
+                        if (b.hp <= 0) {
+                            b.status = 0;
+                            score += 10;
+                            scoreEl.innerText = score;
+                            createParticles(b.x + brickWidth / 2, b.y + brickHeight / 2, b.color);
+                            playCustomLevelSound('brick');
+                        } else {
+                            // Cracked visual
+                            b.color = '#ff66a5';
+                            playCustomLevelSound('brick');
+                        }
+                    }
+
+                    if (currentLevel !== 4 && activeBreakables - 1 <= 0) {
                         gameOver(true);
                         return;
                     }
@@ -486,7 +728,7 @@ function draw() {
     if (!gameRunning) return;
     ctx.clearRect(0, 0, width, height);
 
-    // 移動擋板
+    // 長按與鍵盤連續移動擋板
     if ((keys['ArrowLeft'] || keys['KeyA']) && paddle.x > 0) {
         paddle.x -= paddle.speed;
     }
@@ -494,8 +736,30 @@ function draw() {
         paddle.x += paddle.speed;
     }
 
+    // 繪製 Boss
+    if (boss && boss.hp > 0) {
+        boss.x += boss.dx;
+        if (boss.x + boss.width > width - 10 || boss.x < 10) boss.dx = -boss.dx;
+
+        // Boss Body
+        ctx.save();
+        ctx.fillStyle = boss.color;
+        ctx.shadowColor = boss.color;
+        ctx.shadowBlur = 15;
+        ctx.fillRect(boss.x, boss.y, boss.width, boss.height);
+        
+        // Boss HP Bar
+        let hpRatio = boss.hp / boss.maxHp;
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.fillRect(boss.x, boss.y - 12, boss.width, 6);
+        ctx.fillStyle = '#00d2ff';
+        ctx.fillRect(boss.x, boss.y - 12, boss.width * hpRatio, 6);
+        ctx.restore();
+    }
+
     // 繪製磚塊
     for (let c = 0; c < brickColumnCount; c++) {
+        if (!bricks[c]) continue;
         for (let r = 0; r < brickRowCount; r++) {
             let b = bricks[c][r];
             if (b.status === 1) {
@@ -511,8 +775,19 @@ function draw() {
 
                 ctx.fillStyle = b.color;
                 ctx.shadowColor = b.color;
-                ctx.shadowBlur = 6;
+                ctx.shadowBlur = b.type === 'bomb' ? 12 : 6;
                 ctx.fill();
+
+                // 鋼鐵磚與炸彈磚圖示
+                if (b.type === 'steel') {
+                    ctx.fillStyle = '#cbd5e0';
+                    ctx.fillRect(rx + rw / 4, ry + rh / 4, rw / 2, rh / 2);
+                } else if (b.type === 'bomb') {
+                    ctx.fillStyle = '#000';
+                    ctx.font = 'bold 12px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('💣', rx + rw / 2, ry + rh / 2 + 4);
+                }
                 ctx.restore();
             }
         }
@@ -521,7 +796,7 @@ function draw() {
     // 繪製粒子效果
     updateParticles();
 
-    // 繪製擋板
+    // 繪製擋板 (保證高於方向按鈕區)
     ctx.save();
     ctx.beginPath();
     let px = paddle.x, py = paddle.y, pw = paddle.width, ph = paddle.height, prad = 6;
@@ -555,11 +830,11 @@ function draw() {
     // 牆壁碰撞
     if (ball.x + ball.dx > width - ball.radius || ball.x + ball.dx < ball.radius) {
         ball.dx = -ball.dx;
-        playSound(300, 'triangle', 0.05);
+        playCustomLevelSound('wall');
     }
     if (ball.y + ball.dy < ball.radius) {
         ball.dy = -ball.dy;
-        playSound(350, 'triangle', 0.05);
+        playCustomLevelSound('wall');
     } 
     // 擋板碰撞
     else if (ball.y + ball.dy >= paddle.y - ball.radius && ball.y <= paddle.y + paddle.height) {
@@ -577,11 +852,11 @@ function draw() {
                 ball.dx = ball.dx < 0 ? -1.5 : 1.5;
             }
 
-            playSound(440, 'square', 0.08);
+            playCustomLevelSound('paddle');
         }
     } 
     // 底部掉落 (遊戲結束)
-    else if (ball.y + ball.dy > height - ball.radius) {
+    else if (ball.y + ball.dy > height - controlsAreaHeight - ball.radius) {
         gameOver(false);
         return;
     }
