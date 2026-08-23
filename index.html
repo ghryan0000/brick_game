@@ -183,22 +183,7 @@
             background: rgba(0, 210, 255, 0.15);
             border-color: #00d2ff;
         }
-        .swipe-indicator {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: rgba(255, 255, 255, 0.75);
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-        .swipe-indicator svg {
-            animation: swipe-hint 1.5s infinite ease-in-out;
-        }
-        @keyframes swipe-hint {
-            0%, 100% { transform: translateX(-4px); }
-            50% { transform: translateX(4px); }
-        }
+
 
         /* 發射彈珠/雷射按鈕 */
         #action-btn {
@@ -689,12 +674,7 @@
     <!-- 左右控制按鈕 + 中間滑軌 -->
     <div id="game-controls">
         <div class="ctrl-btn" id="leftBtn">←</div>
-        <div id="swipe-track">
-            <div class="swipe-indicator">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 16l-4-4m0 0l4-4m-4 4h18m-4 4l4-4m0 0l-4-4"/></svg>
-                <span>滑動區域</span>
-            </div>
-        </div>
+        <div id="swipe-track"></div>
         <div class="ctrl-btn" id="rightBtn">→</div>
     </div>
 </div>
@@ -961,6 +941,7 @@ let paddle = {
     x: 0, 
     y: 0, 
     speed: 8,
+    prevX: 0,   // 用於計算擋板速度向量 (for velocity-based physics)
     laserMode: false,
     catchMode: false,
     expandTimer: null
@@ -1440,6 +1421,7 @@ canvas.addEventListener('mousemove', (e) => {
     if (!gameRunning || isPaused || isAiActive) return;
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
+    paddle.prevX = paddle.x;   // 記錄上一格位置以計算速度
     paddle.x = Math.max(0, Math.min(width - paddle.width, mouseX - paddle.width / 2));
 });
 
@@ -1660,6 +1642,7 @@ function draw() {
     runAiLogic();
 
     if (!isAiActive) {
+        paddle.prevX = paddle.x;   // 記錄鍵盤移動前位置
         if ((keys['ArrowLeft'] || keys['KeyA']) && paddle.x > 0) paddle.x -= paddle.speed;
         if ((keys['ArrowRight'] || keys['KeyD']) && paddle.x < width - paddle.width) paddle.x += paddle.speed;
     }
@@ -1923,13 +1906,29 @@ function draw() {
                         actionBtn.style.display = 'block';
                     } else {
                         ball.dy = -Math.abs(ball.dy);
+
+                        // ─── 擋板速度影響彈跳物理 ───────────────────────────────────
+                        // 1. 以碰撞點計算基礎反射角（-60° ~ +60°）
                         let collidePoint = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2);
-                        let bounceAngle = collidePoint * (Math.PI / 3);
-                        let currentSpeed = Math.hypot(ball.dx, ball.dy);
-                        
+                        let bounceAngle  = collidePoint * (Math.PI / 3);  // max ±60°
+
+                        // 2. 計算擋板本格位移速度（像素/幀），正值=向右
+                        let paddleVx = paddle.x - paddle.prevX;
+
+                        // 3. 擋板速度為彈跳方向加入側向偏移（最多 ±0.4 rad，約 ±23°）
+                        let physicsInfluence = Math.max(-0.4, Math.min(0.4, paddleVx * 0.04));
+                        bounceAngle += physicsInfluence;
+                        bounceAngle = Math.max(-Math.PI * 0.72, Math.min(Math.PI * 0.72, bounceAngle));
+
+                        // 4. 速度稍微因擋板向同方向移動而加速，反向而減速
+                        let baseSpeed    = Math.hypot(ball.dx, ball.dy);
+                        let speedBonus   = paddleVx * 0.06;  // 最多 ±0.5 px/幀
+                        let currentSpeed = Math.max(baseSpeed * 0.7, Math.min(baseSpeed * 1.35, baseSpeed + speedBonus));
+
                         ball.dx = currentSpeed * Math.sin(bounceAngle);
                         ball.dy = -currentSpeed * Math.cos(bounceAngle);
-                        
+
+                        // 5. 防止水平角度過小（避免永遠水平飛無法碰頂）
                         if (Math.abs(ball.dx) < 1.2) ball.dx = ball.dx < 0 ? -1.2 : 1.2;
                         playCustomLevelSound('paddle');
                     }
