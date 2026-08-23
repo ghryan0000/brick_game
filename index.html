@@ -739,27 +739,33 @@ function checkScoreMilestone(added) {
     }
 }
 
-function createBall(isMain = false) {
+function createBall(isMain = false, isStuck = true) {
     let baseSpeed = 5.2 + (currentLevel - 1) * 0.45;
-    let angle = (Math.random() * 0.6 - 0.3) * Math.PI;
+    let angle = (Math.random() * 0.4 - 0.2) * Math.PI;
     return {
-        x: width / 2,
-        y: height - controlsAreaHeight - 60,
+        x: paddle.x + paddle.width / 2,
+        y: paddle.y - 7.5,
         radius: 7.5,
-        dx: baseSpeed * Math.sin(angle) || 3,
+        dx: baseSpeed * Math.sin(angle) || 2.5,
         dy: -Math.abs(baseSpeed * Math.cos(angle)),
         speed: baseSpeed,
-        stuck: false,
-        stuckOffset: 0
+        stuck: isStuck,
+        stuckOffset: paddle.width / 2
     };
 }
 
-function resetBallAndPaddle() {
-    balls = [createBall(true)];
+function resetBallAndPaddle(isStuck = true) {
     paddle.x = (width - paddle.width) / 2;
     paddle.laserMode = false;
     paddle.catchMode = false;
-    actionBtn.style.display = 'none';
+    balls = [createBall(true, isStuck)];
+    if (isStuck) {
+        actionBtn.innerText = '🚀 發射彈珠';
+        actionBtn.style.display = 'block';
+        showNotice('🎯 移動擋板定位，點擊「發射」出擊！', '#00f5d4');
+    } else {
+        actionBtn.style.display = 'none';
+    }
     warpGate = null;
 }
 
@@ -1463,6 +1469,17 @@ function draw() {
         if (ball.stuck) {
             ball.x = paddle.x + ball.stuckOffset;
             ball.y = paddle.y - ball.radius;
+
+            // 繪製發射瞄準虛線 (Trajectory Aiming Line)
+            ctx.save();
+            ctx.setLineDash([4, 6]);
+            ctx.strokeStyle = 'rgba(0, 245, 212, 0.5)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(ball.x, ball.y - ball.radius);
+            ctx.lineTo(ball.x, Math.max(60, ball.y - 140));
+            ctx.stroke();
+            ctx.restore();
         }
 
         ctx.save();
