@@ -25,7 +25,7 @@
             --apple-rose-light: #fff0f3;
             --apple-rose-dark: #c9184a;
             --apple-rose-gradient: linear-gradient(135deg, #ff758f 0%, #ff4d6d 50%, #c9184a 100%);
-            --glass-bg: rgba(255, 255, 255, 0.72);
+            --glass-bg: rgba(255, 255, 255, 0.75);
             --glass-border: rgba(255, 255, 255, 0.85);
             --glass-shadow: 0 10px 30px rgba(255, 77, 109, 0.12);
         }
@@ -59,20 +59,8 @@
             display: block;
             width: 100%;
             height: 100%;
+            cursor: ew-resize;
             transition: background 0.4s ease;
-        }
-
-        /* CRT 復古掃描線濾鏡特效 */
-        .crt-scanlines::after {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.04));
-            background-size: 100% 3px, 6px 100%;
-            pointer-events: none;
-            z-index: 8;
         }
 
         /* 頂部 HUD 狀態列 */
@@ -131,26 +119,26 @@
             box-shadow: 0 0 10px rgba(0, 245, 212, 0.4);
         }
 
-        /* 底部控制按鈕 (分立兩側，精確避開瀏覽器工具列) */
+        /* 底部控制區域 (左右按鈕 + 中間滑動指示軌道) */
         #game-controls {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            height: calc(90px + var(--sab));
+            height: calc(88px + var(--sab));
             padding-bottom: var(--sab);
             display: none;
             justify-content: space-between;
             align-items: center;
-            padding-left: 20px;
-            padding-right: 20px;
+            padding-left: 14px;
+            padding-right: 14px;
             pointer-events: none;
             z-index: 5;
         }
         .ctrl-btn {
-            width: 68px;
-            height: 68px;
-            background: rgba(255, 255, 255, 0.14);
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border: 1.5px solid rgba(255, 255, 255, 0.35);
@@ -158,25 +146,65 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 28px;
+            font-size: 26px;
             color: #fff;
             box-shadow: 0 8px 25px rgba(0,0,0,0.5), 0 0 15px rgba(255, 255, 255, 0.1);
             cursor: pointer;
             pointer-events: auto;
             transition: transform 0.1s ease, background 0.1s ease, border-color 0.1s ease;
+            flex-shrink: 0;
         }
         .ctrl-btn:active, .ctrl-btn.active {
             background: rgba(0, 210, 255, 0.4);
             border-color: #00d2ff;
-            transform: scale(0.9);
+            transform: scale(0.92);
             box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
+        }
+
+        /* 中間手勢滑動指示條 (Swipe Track) */
+        #swipe-track {
+            flex: 1;
+            margin: 0 10px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+            cursor: ew-resize;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        #swipe-track:active {
+            background: rgba(0, 210, 255, 0.15);
+            border-color: #00d2ff;
+        }
+        .swipe-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .swipe-indicator svg {
+            animation: swipe-hint 1.5s infinite ease-in-out;
+        }
+        @keyframes swipe-hint {
+            0%, 100% { transform: translateX(-4px); }
+            50% { transform: translateX(4px); }
         }
 
         /* 發射彈珠/雷射按鈕 */
         #action-btn {
             position: absolute;
             bottom: calc(95px + var(--sab));
-            right: 20px;
+            right: 18px;
             padding: 10px 18px;
             background: var(--apple-rose-gradient);
             border: 1.5px solid #fff;
@@ -551,7 +579,7 @@
                 </svg>
             </div>
             <h1 class="apple-title">快打磚塊</h1>
-            <p class="apple-subtitle">經典街機手感 × 智慧 AI 代打<br>專為手機觸控體驗打造</p>
+            <p class="apple-subtitle">桌機滑鼠操控 × 手機手勢滑軌<br>10 大關卡獨特幾何圖騰與磚塊密度</p>
         </div>
 
         <div class="home-actions">
@@ -580,9 +608,7 @@
             <h3>🗺️ 選擇挑戰關卡</h3>
             <button id="close-level-modal" class="btn-close-modal">← 返回首頁</button>
         </div>
-        <div class="level-grid-container" id="level-grid">
-            <!-- 動態生成 10 個關卡卡片 -->
-        </div>
+        <div class="level-grid-container" id="level-grid"></div>
         <button id="level-start-btn" class="btn-apple-primary" style="width: 100%; max-width: 320px; margin-top: 10px;">
             確認並開始此關
         </button>
@@ -595,10 +621,10 @@
             <button id="close-help-modal" class="btn-close-modal">關閉</button>
         </div>
         <div class="help-content">
-            <p style="margin-bottom: 12px; color: #ffb3c1;">打碎磚塊時有機率掉落強化膠囊，接住後可獲得強大特殊技能：</p>
+            <p style="margin-bottom: 12px; color: #ffb3c1;">打碎磚塊時會依難度動態掉落平衡膠囊：</p>
             <div class="capsule-list-item">
                 <div class="capsule-badge" style="background:#ff5400;">L</div>
-                <div><strong>雷射砲 (Laser)</strong>：擋板配備雙雷射砲，可直接射毀上方磚塊。</div>
+                <div><strong>雷射砲 (Laser)</strong>：擋板配備雙雷射砲，直接射毀前方磚塊與魔王。</div>
             </div>
             <div class="capsule-list-item">
                 <div class="capsule-badge" style="background:#3a86ff;">E</div>
@@ -606,7 +632,7 @@
             </div>
             <div class="capsule-list-item">
                 <div class="capsule-badge" style="background:#00f5d4; color:#000;">C</div>
-                <div><strong>黏球磁力 (Catch)</strong>：球接觸擋板時黏住，可重新瞄準自選時機發射。</div>
+                <div><strong>黏球磁力 (Catch)</strong>：球接觸擋板時黏住，可自由移動瞄準後發射。</div>
             </div>
             <div class="capsule-list-item">
                 <div class="capsule-badge" style="background:#00d2ff; color:#000;">D</div>
@@ -621,7 +647,7 @@
                 <div><strong>額外生命 (+1 Life)</strong>：直接增加 1 條生命（❤️）。</div>
             </div>
         </div>
-        <div style="font-size: 11px; color: #a0aec0; margin-top: 10px;">提示：開局或扣命後，彈珠會先黏在擋板上供您自由瞄準定位！</div>
+        <div style="font-size: 11px; color: #a0aec0; margin-top: 10px;">操控提示：桌機可直接滑動滑鼠控制擋板；手機可使用箭頭或中央觸控滑軌！</div>
     </div>
 
     <!-- 4. 結算與停止畫面 (Result Modal) -->
@@ -660,9 +686,15 @@
     <!-- 發射按鈕 -->
     <div id="action-btn">🚀 發射彈珠</div>
 
-    <!-- 左右控制按鈕 (分立兩邊) -->
+    <!-- 左右控制按鈕 + 中間滑軌 -->
     <div id="game-controls">
         <div class="ctrl-btn" id="leftBtn">←</div>
+        <div id="swipe-track">
+            <div class="swipe-indicator">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 16l-4-4m0 0l4-4m-4 4h18m-4 4l4-4m0 0l-4-4"/></svg>
+                <span>滑動區域</span>
+            </div>
+        </div>
         <div class="ctrl-btn" id="rightBtn">→</div>
     </div>
 </div>
@@ -672,7 +704,6 @@ const container = document.getElementById('app-root');
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// UI 元件參照
 const homeScreen = document.getElementById('home-screen');
 const homeStartBtn = document.getElementById('home-start-btn');
 const homeLevelBtn = document.getElementById('home-level-btn');
@@ -705,6 +736,7 @@ const hudAiBtn = document.getElementById('hud-ai-btn');
 const hudHomeBtn = document.getElementById('hud-home-btn');
 
 const gameControls = document.getElementById('game-controls');
+const swipeTrack = document.getElementById('swipe-track');
 const actionBtn = document.getElementById('action-btn');
 const leftBtn = document.getElementById('leftBtn');
 const rightBtn = document.getElementById('rightBtn');
@@ -718,32 +750,31 @@ let currentLevel = 1;
 let dpr = window.devicePixelRatio || 1;
 let width = 0;
 let height = 0;
-const controlsAreaHeight = 90;
+const controlsAreaHeight = 88;
 
-// 10 關卡主題設計
-const LEVEL_THEMES = {
-    1: { name: "經典初階", desc: "標準彩磚 / 溫和節奏", bg: "radial-gradient(circle at center, #151336 0%, #04030f 100%)", paddle: ['#00d2ff', '#0072ff'], shadow: '#00d2ff' },
-    2: { name: "翡翠綠野", desc: "密集矩陣 / 柔和微風", bg: "radial-gradient(circle at center, #0b2e23 0%, #03130e 100%)", paddle: ['#00f5d4', '#058c70'], shadow: '#00f5d4' },
-    3: { name: "疾速雙擊", desc: "強化粉磚 / 疾速球速", bg: "radial-gradient(circle at center, #350d2e 0%, #12030f 100%)", paddle: ['#ff006e', '#8338ec'], shadow: '#ff006e' },
-    4: { name: "鋼鐵防線", desc: "不可破壞鋼磚障礙", bg: "radial-gradient(circle at center, #1e2638 0%, #0a0e17 100%)", paddle: ['#a0aec0', '#4a5568'], shadow: '#cbd5e0' },
-    5: { name: "炸彈連環", desc: "💣炸彈連鎖爆破", bg: "radial-gradient(circle at center, #3a1c06 0%, #150902 100%)", paddle: ['#ffbe0b', '#fb5607'], shadow: '#ffbe0b' },
-    6: { name: "鑽石迷陣", desc: "菱形陣列 / 3擊重磚", bg: "radial-gradient(circle at center, #0d2838 0%, #041018 100%)", paddle: ['#3a86ff', '#00f5d4'], shadow: '#3a86ff' },
-    7: { name: "幽靈小兵", desc: "頻繁飛行小兵干擾", bg: "radial-gradient(circle at center, #261138 0%, #0f0417 100%)", paddle: ['#8338ec', '#ff006e'], shadow: '#8338ec' },
-    8: { name: "狹縫穿梭", desc: "極窄入口 / 暴速反彈", bg: "radial-gradient(circle at center, #1c1a3a 0%, #060517 100%)", paddle: ['#00d2ff', '#ffbe0b'], shadow: '#00d2ff' },
-    9: { name: "烈焰煉獄", desc: "極速熔岩 / 雙重障礙", bg: "radial-gradient(circle at center, #420d09 0%, #1a0302 100%)", paddle: ['#ff0055', '#ff5400'], shadow: '#ff0055' },
-    10: { name: "DOH終極魔王", desc: "摩艾頭像 / 雙電漿彈幕", bg: "radial-gradient(circle at center, #2a2005 0%, #0e0a02 100%)", paddle: ['#ffd700', '#ff8c00'], shadow: '#ffd700' }
+// 10 關卡獨特主題與幾何陣列設定 (Themes, Layouts, Density, Visual Icons)
+const LEVEL_CONFIGS = {
+    1: { name: "經典初階", desc: "標準矩陣 / 溫和節奏", cols: 5, rows: 4, bg: "radial-gradient(circle at center, #151336 0%, #04030f 100%)", paddle: ['#00d2ff', '#0072ff'], shadow: '#00d2ff', icon: '★' },
+    2: { name: "翡翠綠野", desc: "交錯棋盤 / 柔和微風", cols: 6, rows: 5, bg: "radial-gradient(circle at center, #0b2e23 0%, #03130e 100%)", paddle: ['#00f5d4', '#058c70'], shadow: '#00f5d4', icon: '🍀' },
+    3: { name: "疾速雙擊", desc: "V形雙翼 / 強化粉磚", cols: 6, rows: 6, bg: "radial-gradient(circle at center, #350d2e 0%, #12030f 100%)", paddle: ['#ff006e', '#8338ec'], shadow: '#ff006e', icon: '⚡' },
+    4: { name: "鋼鐵堡壘", desc: "重裝外盾 / 鋼甲防線", cols: 7, rows: 5, bg: "radial-gradient(circle at center, #1e2638 0%, #0a0e17 100%)", paddle: ['#a0aec0', '#4a5568'], shadow: '#cbd5e0', icon: '🛡️' },
+    5: { name: "炸彈連環", desc: "十字矩陣 / 💣連鎖爆破", cols: 6, rows: 6, bg: "radial-gradient(circle at center, #3a1c06 0%, #150902 100%)", paddle: ['#ffbe0b', '#fb5607'], shadow: '#ffbe0b', icon: '💣' },
+    6: { name: "鑽石迷陣", desc: "菱形晶體 / 3擊重磚", cols: 7, rows: 6, bg: "radial-gradient(circle at center, #0d2838 0%, #041018 100%)", paddle: ['#3a86ff', '#00f5d4'], shadow: '#3a86ff', icon: '💎' },
+    7: { name: "幽靈雙塔", desc: "雙柱高塔 / 飛行小兵", cols: 8, rows: 6, bg: "radial-gradient(circle at center, #261138 0%, #0f0417 100%)", paddle: ['#8338ec', '#ff006e'], shadow: '#8338ec', icon: '👻' },
+    8: { name: "狹縫迷宮", desc: "極窄通道 / 暴速反彈", cols: 8, rows: 6, bg: "radial-gradient(circle at center, #1c1a3a 0%, #060517 100%)", paddle: ['#00d2ff', '#ffbe0b'], shadow: '#00d2ff', icon: '⚙️' },
+    9: { name: "烈焰煉獄", desc: "密集蜂巢 / 熔岩重防", cols: 8, rows: 7, bg: "radial-gradient(circle at center, #420d09 0%, #1a0302 100%)", paddle: ['#ff0055', '#ff5400'], shadow: '#ff0055', icon: '🔥' },
+    10: { name: "DOH魔王", desc: "巨型摩艾 / 雙電漿彈幕", cols: 7, rows: 3, bg: "radial-gradient(circle at center, #2a2005 0%, #0e0a02 100%)", paddle: ['#ffd700', '#ff8c00'], shadow: '#ffd700', icon: '👑' }
 };
 
-// 動態建立 10 個關卡卡片
 function renderLevelCards() {
     levelGrid.innerHTML = '';
     for (let lvl = 1; lvl <= 10; lvl++) {
-        let t = LEVEL_THEMES[lvl];
+        let t = LEVEL_CONFIGS[lvl];
         let card = document.createElement('div');
         card.className = `level-item-card ${lvl === selectedLevel ? 'selected' : ''}`;
         card.dataset.level = lvl;
         card.innerHTML = `
-            <div class="lvl-item-title">LV ${lvl}. ${t.name}</div>
+            <div class="lvl-item-title">${t.icon} LV ${lvl}. ${t.name}</div>
             <div class="lvl-item-subtitle">${t.desc}</div>
         `;
         card.addEventListener('click', () => {
@@ -757,28 +788,16 @@ function renderLevelCards() {
 }
 renderLevelCards();
 
-// 首頁按鈕導覽
-homeStartBtn.addEventListener('click', () => {
-    startGame(selectedLevel);
-});
-homeLevelBtn.addEventListener('click', () => {
-    levelModal.style.display = 'flex';
-});
-closeLevelModal.addEventListener('click', () => {
-    levelModal.style.display = 'none';
-});
+homeStartBtn.addEventListener('click', () => startGame(selectedLevel));
+homeLevelBtn.addEventListener('click', () => levelModal.style.display = 'flex');
+closeLevelModal.addEventListener('click', () => levelModal.style.display = 'none');
 levelStartBtn.addEventListener('click', () => {
     levelModal.style.display = 'none';
     startGame(selectedLevel);
 });
-homeHelpBtn.addEventListener('click', () => {
-    helpModal.style.display = 'flex';
-});
-closeHelpModal.addEventListener('click', () => {
-    helpModal.style.display = 'none';
-});
+homeHelpBtn.addEventListener('click', () => helpModal.style.display = 'flex');
+closeHelpModal.addEventListener('click', () => helpModal.style.display = 'none');
 
-// 結算畫面按鈕
 resultNextBtn.addEventListener('click', () => {
     resultModal.style.display = 'none';
     if (selectedLevel < 10) selectedLevel++;
@@ -793,9 +812,8 @@ resultHomeBtn.addEventListener('click', () => {
     exitToHome();
 });
 
-// HUD 頂部按鈕
 hudHomeBtn.addEventListener('click', () => {
-    if (confirm("確定要暫停並返回遊戲首頁嗎？")) {
+    if (confirm("確定要返回遊戲首頁嗎？")) {
         exitToHome();
     }
 });
@@ -857,7 +875,6 @@ function hapticFeedback(pattern) {
     }
 }
 
-// 智慧螢幕適配 (針對 Chrome / Safari / Brave 視窗高度校準)
 function resize() {
     const rect = container.getBoundingClientRect();
     width = rect.width;
@@ -964,6 +981,9 @@ let comboStreak = 0;
 let gameRunning = false;
 let animationId = null;
 
+let totalBreakablesToClear = 0;
+let bricksDestroyedSinceLastDrop = 0;
+
 let brickRowCount = 5;
 let brickColumnCount = 5;
 let brickWidth = 0;
@@ -1053,19 +1073,49 @@ function resetBallAndPaddle(isStuck = true) {
     }
 }
 
-// 移除直接過關道具 (保留 L, E, C, D, S, P 6款)
-const CAPSULE_TYPES = [
-    { type: 'L', letter: 'L', color: '#ff5400', label: '雷射砲 (Laser)' },
-    { type: 'E', letter: 'E', color: '#3a86ff', label: '擴大板 (Expand)' },
-    { type: 'C', letter: 'C', color: '#00f5d4', label: '黏球磁力 (Catch)' },
-    { type: 'D', letter: 'D', color: '#00d2ff', label: '三球分裂 (Disrupt)' },
-    { type: 'S', letter: 'S', color: '#ffbe0b', label: '減速球 (Slow)' },
-    { type: 'P', letter: 'P', color: '#a0aec0', label: '+1 生命 (1UP)' }
-];
+// 根據關卡難度動態分配平衡膠囊 (降低掉落率至 ~12%)
+function spawnAdaptiveCapsule(x, y) {
+    bricksDestroyedSinceLastDrop++;
+    if (bricksDestroyedSinceLastDrop < 4) return; // 冷卻機制：每摧毀至少 4 塊磚才有機率掉落
+    if (Math.random() > 0.14) return; // 14% 掉落機率
 
-function spawnCapsule(x, y) {
-    if (Math.random() > 0.26) return;
-    let item = CAPSULE_TYPES[Math.floor(Math.random() * CAPSULE_TYPES.length)];
+    bricksDestroyedSinceLastDrop = 0;
+
+    let candidatePool = [];
+    if (currentLevel <= 2) {
+        candidatePool = [
+            { type: 'E', letter: 'E', color: '#3a86ff', label: '擴大板 (Expand)' },
+            { type: 'E', letter: 'E', color: '#3a86ff', label: '擴大板 (Expand)' },
+            { type: 'S', letter: 'S', color: '#ffbe0b', label: '減速球 (Slow)' },
+            { type: 'P', letter: 'P', color: '#a0aec0', label: '+1 生命 (1UP)' }
+        ];
+    } else if (currentLevel <= 5) {
+        candidatePool = [
+            { type: 'C', letter: 'C', color: '#00f5d4', label: '黏球磁力 (Catch)' },
+            { type: 'D', letter: 'D', color: '#00d2ff', label: '三球分裂 (Disrupt)' },
+            { type: 'E', letter: 'E', color: '#3a86ff', label: '擴大板 (Expand)' },
+            { type: 'S', letter: 'S', color: '#ffbe0b', label: '減速球 (Slow)' }
+        ];
+    } else if (currentLevel <= 8) {
+        candidatePool = [
+            { type: 'L', letter: 'L', color: '#ff5400', label: '雷射砲 (Laser)' },
+            { type: 'C', letter: 'C', color: '#00f5d4', label: '黏球磁力 (Catch)' },
+            { type: 'D', letter: 'D', color: '#00d2ff', label: '三球分裂 (Disrupt)' },
+            { type: 'E', letter: 'E', color: '#3a86ff', label: '擴大板 (Expand)' },
+            { type: 'P', letter: 'P', color: '#a0aec0', label: '+1 生命 (1UP)' }
+        ];
+    } else {
+        // Level 9 & 10 決戰關卡
+        candidatePool = [
+            { type: 'L', letter: 'L', color: '#ff5400', label: '雷射砲 (Laser)' },
+            { type: 'L', letter: 'L', color: '#ff5400', label: '雷射砲 (Laser)' },
+            { type: 'E', letter: 'E', color: '#3a86ff', label: '擴大板 (Expand)' },
+            { type: 'P', letter: 'P', color: '#a0aec0', label: '+1 生命 (1UP)' },
+            { type: 'D', letter: 'D', color: '#00d2ff', label: '三球分裂 (Disrupt)' }
+        ];
+    }
+
+    let item = candidatePool[Math.floor(Math.random() * candidatePool.length)];
     capsules.push({
         x: x, y: y,
         width: 32, height: 16,
@@ -1191,6 +1241,92 @@ function runAiLogic() {
     if (targetBall.stuck) releaseStuckBalls();
 }
 
+// 根據 10 關卡配置不同陣列圖案與密度
+function buildLevelBricks(lvl) {
+    const cfg = LEVEL_CONFIGS[lvl] || LEVEL_CONFIGS[1];
+    brickColumnCount = cfg.cols;
+    brickRowCount = cfg.rows;
+    brickWidth = (width - (brickOffsetLeft * 2) - (brickPadding * (brickColumnCount - 1))) / brickColumnCount;
+    
+    bricks = [];
+    totalBreakablesToClear = 0;
+    const colors = ['#ff006e', '#fb5607', '#ffbe0b', '#3a86ff', '#8338ec', '#00f5d4'];
+
+    for (let c = 0; c < brickColumnCount; c++) {
+        bricks[c] = [];
+        for (let r = 0; r < brickRowCount; r++) {
+            let active = 1;
+            let type = 'normal';
+            let hp = 1;
+            let color = colors[(r + c + lvl) % colors.length];
+            let scoreVal = 50 + r * 10;
+            let icon = cfg.icon;
+
+            // 關卡專屬圖案陣列設計
+            if (lvl === 1) {
+                // LV1: 標準全彩陣列
+            } else if (lvl === 2) {
+                // LV2: 棋盤交錯
+                if ((c + r) % 2 === 1) {
+                    type = 'tough'; hp = 2; color = '#00f5d4'; scoreVal = 100;
+                }
+            } else if (lvl === 3) {
+                // LV3: V形翅膀陣列
+                if (r > c && r > (brickColumnCount - 1 - c)) active = 0;
+                if (r === 0 || r === 1) { type = 'tough'; hp = 2; color = '#ff006e'; scoreVal = 120; }
+            } else if (lvl === 4) {
+                // LV4: 鋼甲防線 (外圈 3 擊重磚，內部核心)
+                if (c === 0 || c === brickColumnCount - 1 || r === 0) {
+                    type = 'heavy'; hp = 3; color = '#a0aec0'; scoreVal = 180; icon = '🛡️';
+                }
+            } else if (lvl === 5) {
+                // LV5: 十字十字矩陣 + 4 角炸彈
+                if ((c === 1 && r === 1) || (c === 4 && r === 1) || (c === 1 && r === 4) || (c === 4 && r === 4)) {
+                    type = 'bomb'; color = '#ffbe0b'; scoreVal = 200; icon = '💣';
+                }
+            } else if (lvl === 6) {
+                // LV6: 菱形幾何晶體
+                let midC = Math.floor(brickColumnCount / 2);
+                let midR = Math.floor(brickRowCount / 2);
+                if (Math.abs(c - midC) + Math.abs(r - midR) > 3) active = 0;
+                else if (Math.abs(c - midC) + Math.abs(r - midR) === 0) {
+                    type = 'heavy'; hp = 3; color = '#3a86ff'; scoreVal = 250; icon = '💎';
+                }
+            } else if (lvl === 7) {
+                // LV7: 雙柱高塔
+                if (c === 3 || c === 4) active = 0; // 中央簍空通道
+                if (r === 0 || r === 1) { type = 'tough'; hp = 2; color = '#8338ec'; scoreVal = 140; }
+            } else if (lvl === 8) {
+                // LV8: 狹縫迴廊
+                if (r === 2 && (c < 3 || c > 4)) { type = 'heavy'; hp = 4; color = '#cbd5e0'; scoreVal = 300; }
+            } else if (lvl === 9) {
+                // LV9: 烈焰蜂巢全密度
+                if (r % 2 === 0) { type = 'heavy'; hp = 3; color = '#ff0055'; scoreVal = 220; icon = '🔥'; }
+                if (r === 3 && (c === 2 || c === 5)) { type = 'bomb'; color = '#ffbe0b'; scoreVal = 250; icon = '💣'; }
+            } else if (lvl === 10) {
+                // LV10: DOH 終極魔王防線
+                if (r === 2) { type = 'heavy'; hp = 3; color = '#ffd700'; scoreVal = 300; icon = '👑'; }
+            }
+
+            if (active === 1) {
+                totalBreakablesToClear++;
+            }
+
+            bricks[c][r] = {
+                x: c * (brickWidth + brickPadding) + brickOffsetLeft,
+                y: r * (brickHeight + brickPadding) + (lvl === 10 ? 125 : brickOffsetTop),
+                status: active,
+                type: type,
+                hp: hp,
+                maxHp: hp,
+                color: color,
+                scoreVal: scoreVal,
+                icon: icon
+            };
+        }
+    }
+}
+
 function startGame(lvl) {
     initAudio();
     if (animationId) {
@@ -1207,13 +1343,14 @@ function startGame(lvl) {
     hudLevelBadge.innerText = `LV ${currentLevel}`;
     resize();
 
-    let theme = LEVEL_THEMES[currentLevel] || LEVEL_THEMES[1];
-    canvas.style.background = theme.bg;
+    let cfg = LEVEL_CONFIGS[currentLevel] || LEVEL_CONFIGS[1];
+    canvas.style.background = cfg.bg;
 
     lives = 3;
     updateLivesUI();
     nextLifeScore = 20000;
     comboStreak = 0;
+    bricksDestroyedSinceLastDrop = 0;
     isPaused = false;
     hudPauseBtn.innerText = '⏸ 暫停';
     hudPauseBtn.classList.remove('active');
@@ -1224,26 +1361,18 @@ function startGame(lvl) {
 
     resetBallAndPaddle(true);
 
-    brickColumnCount = currentLevel % 2 === 0 ? 6 : 5;
-    brickRowCount = currentLevel === 10 ? 2 : (currentLevel >= 6 ? 6 : 5);
-    brickWidth = (width - (brickOffsetLeft * 2) - (brickPadding * (brickColumnCount - 1))) / brickColumnCount;
+    buildLevelBricks(currentLevel);
 
-    bricks = [];
     boss = null;
     capsules = [];
     lasers = [];
     enemies = [];
     bossProjectiles = [];
 
-    if (enemyTimer) clearInterval(enemyTimer);
-    enemyTimer = setInterval(spawnEnemy, Math.max(6000, 14000 - currentLevel * 800));
-
-    const colors = ['#ff006e', '#fb5607', '#ffbe0b', '#3a86ff', '#8338ec', '#00f5d4'];
-
     if (currentLevel === 10) {
         boss = {
             x: width / 2 - 65,
-            y: 65,
+            y: 60,
             width: 130,
             height: 42,
             hp: 30,
@@ -1252,59 +1381,10 @@ function startGame(lvl) {
             shootTimer: 0,
             color: '#ff0055'
         };
-        for (let c = 0; c < brickColumnCount; c++) {
-            bricks[c] = [];
-            for (let r = 0; r < 2; r++) {
-                bricks[c][r] = {
-                    x: c * (brickWidth + brickPadding) + brickOffsetLeft,
-                    y: r * (brickHeight + brickPadding) + 125,
-                    status: 1,
-                    type: 'normal',
-                    hp: 1,
-                    color: '#8338ec',
-                    scoreVal: 100
-                };
-            }
-        }
-    } else {
-        for (let c = 0; c < brickColumnCount; c++) {
-            bricks[c] = [];
-            for (let r = 0; r < brickRowCount; r++) {
-                let type = 'normal';
-                let hp = 1;
-                let color = colors[(r + currentLevel) % colors.length];
-                let scoreVal = 50 + r * 10;
-
-                if (currentLevel === 3 && (r === 0 || r === 1)) {
-                    type = 'tough'; hp = 2; color = '#ff006e'; scoreVal = 120;
-                } else if (currentLevel === 4 && r === 2 && (c === 1 || c === 3)) {
-                    type = 'steel'; color = '#718096';
-                } else if (currentLevel === 5 && ((r === 1 && c === 2) || (r === 3 && c === 1))) {
-                    type = 'bomb'; color = '#ffbe0b'; scoreVal = 180;
-                } else if (currentLevel === 6) {
-                    if (r === 0) { type = 'heavy'; hp = 3; color = '#00f5d4'; scoreVal = 200; }
-                    else if (r === 1 || r === 2) { type = 'tough'; hp = 2; color = '#3a86ff'; scoreVal = 140; }
-                } else if (currentLevel === 7 && r === 2 && c % 2 === 1) {
-                    type = 'steel'; color = '#718096';
-                } else if (currentLevel === 8 && r === 2) {
-                    type = 'steel'; color = '#718096';
-                } else if (currentLevel === 9) {
-                    if (r === 0 || r === 1) { type = 'heavy'; hp = 3; color = '#ff0055'; scoreVal = 220; }
-                    if (r === 2 && c === 2) { type = 'bomb'; color = '#ffbe0b'; scoreVal = 250; }
-                }
-
-                bricks[c][r] = {
-                    x: c * (brickWidth + brickPadding) + brickOffsetLeft,
-                    y: r * (brickHeight + brickPadding) + brickOffsetTop,
-                    status: 1,
-                    type: type,
-                    hp: hp,
-                    color: color,
-                    scoreVal: scoreVal
-                };
-            }
-        }
     }
+
+    if (enemyTimer) clearInterval(enemyTimer);
+    enemyTimer = setInterval(spawnEnemy, Math.max(6000, 14000 - currentLevel * 800));
 
     score = 0;
     hudScore.innerText = score;
@@ -1313,7 +1393,6 @@ function startGame(lvl) {
     draw();
 }
 
-// 結算與停止畫面顯示 (不再直接跳回首頁選關)
 function showResultScreen(isWin) {
     gameRunning = false;
     if (animationId) {
@@ -1356,6 +1435,25 @@ function showResultScreen(isWin) {
     resultModal.style.display = 'flex';
 }
 
+// 1. 桌機滑鼠操控支援 (Mouse Control on Desktop)
+canvas.addEventListener('mousemove', (e) => {
+    if (!gameRunning || isPaused || isAiActive) return;
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    paddle.x = Math.max(0, Math.min(width - paddle.width, mouseX - paddle.width / 2));
+});
+
+canvas.addEventListener('mousedown', () => {
+    if (!gameRunning || isPaused) return;
+    initAudio();
+    if (balls.some(b => b.stuck)) {
+        releaseStuckBalls();
+    } else if (paddle.laserMode) {
+        fireLaser();
+    }
+});
+
+// 2. 鍵盤控制
 const keys = {};
 let tapStep = 22;
 
@@ -1410,13 +1508,31 @@ window.addEventListener('keyup', (e) => {
     if (['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'].includes(e.code)) keys[e.code] = false;
 });
 
-// 手勢滑動與點擊發射
+// 3. 中間觸控滑軌 (Swipe Track Drag Support)
+function handleSwipeTouch(clientX) {
+    const rect = canvas.getBoundingClientRect();
+    const touchX = clientX - rect.left;
+    paddle.x = Math.max(0, Math.min(width - paddle.width, touchX - paddle.width / 2));
+}
+
+swipeTrack.addEventListener('touchmove', (e) => {
+    if (!gameRunning || isPaused) return;
+    handleSwipeTouch(e.touches[0].clientX);
+}, { passive: true });
+
+swipeTrack.addEventListener('touchstart', (e) => {
+    if (!gameRunning || isPaused) return;
+    initAudio();
+    handleSwipeTouch(e.touches[0].clientX);
+}, { passive: true });
+
+// 4. 畫布觸控滑動
 let isDragging = false;
 canvas.addEventListener('touchstart', (e) => {
     if (!gameRunning || isPaused) return;
     initAudio();
     isDragging = true;
-    movePaddleWithTouch(e.touches[0].clientX);
+    handleSwipeTouch(e.touches[0].clientX);
     if (balls.some(b => b.stuck)) {
         releaseStuckBalls();
     }
@@ -1424,16 +1540,10 @@ canvas.addEventListener('touchstart', (e) => {
 
 canvas.addEventListener('touchmove', (e) => {
     if (!gameRunning || !isDragging || isPaused) return;
-    movePaddleWithTouch(e.touches[0].clientX);
+    handleSwipeTouch(e.touches[0].clientX);
 }, { passive: true });
 
 canvas.addEventListener('touchend', () => { isDragging = false; });
-
-function movePaddleWithTouch(clientX) {
-    const rect = canvas.getBoundingClientRect();
-    const touchX = clientX - rect.left;
-    paddle.x = Math.max(0, Math.min(width - paddle.width, touchX - paddle.width / 2));
-}
 
 function triggerBombExplosion(centerC, centerR) {
     playCustomLevelSound('bomb');
@@ -1442,7 +1552,7 @@ function triggerBombExplosion(centerC, centerR) {
         if (!bricks[c]) continue;
         for (let r = Math.max(0, centerR - 1); r <= Math.min(brickRowCount - 1, centerR + 1); r++) {
             let target = bricks[c][r];
-            if (target && target.status === 1 && target.type !== 'steel') {
+            if (target && target.status === 1) {
                 target.status = 0;
                 checkScoreMilestone(25);
                 createParticles(target.x + brickWidth / 2, target.y + brickHeight / 2, '#ffbe0b', 15);
@@ -1451,8 +1561,11 @@ function triggerBombExplosion(centerC, centerR) {
     }
 }
 
-// 嚴謹過關判定 (完全遍歷統計剩餘磚塊，杜絕提前誤判過關)
+// 嚴謹過關判定 (完全確認所有磚塊 status === 0)
 function checkLevelClearCondition() {
+    if (!gameRunning || totalBreakablesToClear === 0) return false;
+
+    // 第 10 關：擊毀魔王即算獲勝
     if (currentLevel === 10) {
         if (boss && boss.hp <= 0) {
             showResultScreen(true);
@@ -1461,18 +1574,19 @@ function checkLevelClearCondition() {
         return false;
     }
 
-    let remainingBreakables = 0;
+    let activeCount = 0;
     for (let c = 0; c < brickColumnCount; c++) {
         if (!bricks[c]) continue;
         for (let r = 0; r < brickRowCount; r++) {
             let b = bricks[c][r];
-            if (b && b.status === 1 && b.type !== 'steel') {
-                remainingBreakables++;
+            if (b && b.status === 1) {
+                activeCount++;
             }
         }
     }
 
-    if (remainingBreakables === 0) {
+    // 唯有全部磚塊完全擊破時方可過關
+    if (activeCount === 0) {
         showResultScreen(true);
         return true;
     }
@@ -1511,11 +1625,7 @@ function collisionDetection() {
                         
                         ball.dy = -ball.dy;
 
-                        if (b.type === 'steel') {
-                            playCustomLevelSound('steel');
-                            createParticles(ball.x, ball.y, '#a0aec0', 5);
-                            hapticFeedback(10);
-                        } else if (b.type === 'bomb') {
+                        if (b.type === 'bomb') {
                             b.status = 0;
                             triggerBombExplosion(c, r);
                         } else {
@@ -1528,7 +1638,7 @@ function collisionDetection() {
                                 createParticles(b.x + brickWidth / 2, b.y + brickHeight / 2, b.color);
                                 playCustomLevelSound('brick');
                                 hapticFeedback(12);
-                                spawnCapsule(b.x + brickWidth / 2, b.y + brickHeight / 2);
+                                spawnAdaptiveCapsule(b.x + brickWidth / 2, b.y + brickHeight / 2);
                             } else {
                                 b.color = b.hp === 2 ? '#ff66a5' : '#ffa8d5';
                                 playCustomLevelSound('brick');
@@ -1540,7 +1650,6 @@ function collisionDetection() {
         }
     }
 
-    // 每一影格碰撞後進行全面檢查
     checkLevelClearCondition();
 }
 
@@ -1608,7 +1717,7 @@ function draw() {
         }
     }
 
-    // 磚塊繪製
+    // 磚塊繪製 (包含圖示與光影)
     for (let c = 0; c < brickColumnCount; c++) {
         if (!bricks[c]) continue;
         for (let r = 0; r < brickRowCount; r++) {
@@ -1629,14 +1738,11 @@ function draw() {
                 ctx.shadowBlur = b.type === 'bomb' ? 12 : 6;
                 ctx.fill();
 
-                if (b.type === 'steel') {
-                    ctx.fillStyle = '#cbd5e0';
-                    ctx.fillRect(rx + rw / 4, ry + rh / 4, rw / 2, rh / 2);
-                } else if (b.type === 'bomb') {
-                    ctx.fillStyle = '#000';
-                    ctx.font = 'bold 11px sans-serif';
+                if (b.icon) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 10px sans-serif';
                     ctx.textAlign = 'center';
-                    ctx.fillText('💣', rx + rw / 2, ry + rh / 2 + 4);
+                    ctx.fillText(b.icon, rx + rw / 2, ry + rh / 2 + 3.5);
                 }
                 ctx.restore();
             }
@@ -1696,14 +1802,14 @@ function draw() {
             if (!bricks[c]) continue;
             for (let r = 0; r < brickRowCount; r++) {
                 let b = bricks[c][r];
-                if (b && b.status === 1 && b.type !== 'steel') {
+                if (b && b.status === 1) {
                     if (l.x >= b.x && l.x <= b.x + brickWidth && l.y >= b.y && l.y <= b.y + brickHeight) {
                         b.hp--;
                         if (b.hp <= 0) {
                             b.status = 0;
                             checkScoreMilestone(b.scoreVal);
                             createParticles(b.x + brickWidth/2, b.y + brickHeight/2, b.color);
-                            spawnCapsule(b.x + brickWidth/2, b.y + brickHeight/2);
+                            spawnAdaptiveCapsule(b.x + brickWidth/2, b.y + brickHeight/2);
                         }
                         lasers.splice(i, 1);
                         break;
@@ -1748,7 +1854,7 @@ function draw() {
     updateParticles();
 
     // 擋板
-    let theme = LEVEL_THEMES[currentLevel] || LEVEL_THEMES[1];
+    let cfg = LEVEL_CONFIGS[currentLevel] || LEVEL_CONFIGS[1];
     ctx.save();
     ctx.beginPath();
     let px = paddle.x, py = paddle.y, pw = paddle.width, ph = paddle.height, prad = 6;
@@ -1760,10 +1866,10 @@ function draw() {
     ctx.closePath();
     
     let paddleGradient = ctx.createLinearGradient(px, py, px + pw, py);
-    paddleGradient.addColorStop(0, paddle.laserMode ? '#ff5400' : theme.paddle[0]);
-    paddleGradient.addColorStop(1, paddle.laserMode ? '#ff006e' : theme.paddle[1]);
+    paddleGradient.addColorStop(0, paddle.laserMode ? '#ff5400' : cfg.paddle[0]);
+    paddleGradient.addColorStop(1, paddle.laserMode ? '#ff006e' : cfg.paddle[1]);
     ctx.fillStyle = paddleGradient;
-    ctx.shadowColor = paddle.laserMode ? '#ff5400' : theme.shadow;
+    ctx.shadowColor = paddle.laserMode ? '#ff5400' : cfg.shadow;
     ctx.shadowBlur = 12;
     ctx.fill();
     ctx.restore();
