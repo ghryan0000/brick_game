@@ -160,28 +160,25 @@
             transform: scale(0.92);
             box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
         }
+        /* 滑動方向点亮特效 (Swipe direction lit effect) */
+        .ctrl-btn.lit {
+            background: rgba(0, 210, 255, 0.55);
+            border-color: #00d2ff;
+            box-shadow: 0 0 32px rgba(0, 210, 255, 0.85), 0 0 8px rgba(255,255,255,0.4);
+            color: #fff;
+            transition: background 0.08s ease, box-shadow 0.08s ease;
+        }
 
-        /* 中間手勢滑動指示條 (Swipe Track) */
+
+        /* 中間滑動區（完全透明，保留觸控面積） */
         #swipe-track {
             flex: 1;
             margin: 0 10px;
             height: 50px;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border: 1px dashed rgba(255, 255, 255, 0.3);
-            border-radius: 25px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: transparent;
+            border: none;
             pointer-events: auto;
             cursor: ew-resize;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
-            transition: border-color 0.2s ease, background 0.2s ease;
-        }
-        #swipe-track:active {
-            background: rgba(0, 210, 255, 0.15);
-            border-color: #00d2ff;
         }
 
 
@@ -1497,16 +1494,51 @@ function handleSwipeTouch(clientX) {
     paddle.x = Math.max(0, Math.min(width - paddle.width, touchX - paddle.width / 2));
 }
 
-swipeTrack.addEventListener('touchmove', (e) => {
-    if (!gameRunning || isPaused) return;
-    handleSwipeTouch(e.touches[0].clientX);
-}, { passive: true });
+// 展示滑動方向笑頭點亮 (Swipe direction arrow highlight)
+let swipeLitTimer = null;
+function clearSwipeLit() {
+    leftBtn.classList.remove('lit');
+    rightBtn.classList.remove('lit');
+}
+function flashSwipeLit(dir) {
+    clearSwipeLit();
+    if (dir === 'left')  leftBtn.classList.add('lit');
+    if (dir === 'right') rightBtn.classList.add('lit');
+    clearTimeout(swipeLitTimer);
+    swipeLitTimer = setTimeout(clearSwipeLit, 180);  // 滑動停止後 180ms 恢復
+}
 
+let _lastSwipeX = null;
 swipeTrack.addEventListener('touchstart', (e) => {
     if (!gameRunning || isPaused) return;
     initAudio();
+    _lastSwipeX = e.touches[0].clientX;
     handleSwipeTouch(e.touches[0].clientX);
 }, { passive: true });
+
+swipeTrack.addEventListener('touchmove', (e) => {
+    if (!gameRunning || isPaused) return;
+    const curX = e.touches[0].clientX;
+    if (_lastSwipeX !== null) {
+        const delta = curX - _lastSwipeX;
+        if (Math.abs(delta) > 3) {                   // 最小派對隀唃咱 3px 才判斷
+            flashSwipeLit(delta < 0 ? 'left' : 'right');
+        }
+    }
+    _lastSwipeX = curX;
+    handleSwipeTouch(curX);
+}, { passive: true });
+
+swipeTrack.addEventListener('touchend', () => {
+    _lastSwipeX = null;
+    clearSwipeLit();
+}, { passive: true });
+
+swipeTrack.addEventListener('touchcancel', () => {
+    _lastSwipeX = null;
+    clearSwipeLit();
+}, { passive: true });
+
 
 // 4. 畫布觸控滑動
 let isDragging = false;
