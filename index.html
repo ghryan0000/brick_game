@@ -1119,7 +1119,21 @@ function gameOver(isWin) {
         cancelAnimationFrame(animationId);
         animationId = null;
     }
-    if (enemyTimer) clearInterval(enemyTimer);
+    if (enemyTimer) {
+        clearInterval(enemyTimer);
+        enemyTimer = null;
+    }
+    if (paddle.expandTimer) {
+        clearTimeout(paddle.expandTimer);
+        paddle.expandTimer = null;
+    }
+    paddle.laserMode = false;
+    paddle.catchMode = false;
+    actionBtn.style.display = 'none';
+    lasers = [];
+    capsules = [];
+    bossProjectiles = [];
+    enemies = [];
 
     if (score > highscore) {
         highscore = score;
@@ -1384,6 +1398,21 @@ function draw() {
         ctx.shadowColor = '#ff006e';
         ctx.shadowBlur = 10;
         ctx.fillRect(l.x, l.y, l.width, l.height);
+
+        // 雷射擊中 Boss
+        if (boss && boss.hp > 0 && l.x >= boss.x && l.x <= boss.x + boss.width && l.y >= boss.y && l.y <= boss.y + boss.height) {
+            boss.hp--;
+            checkScoreMilestone(150);
+            createParticles(l.x, l.y, '#ff0055', 8);
+            playCustomLevelSound('bossHit');
+            hapticFeedback(15);
+            lasers.splice(i, 1);
+            if (boss.hp <= 0) {
+                gameOver(true);
+                return;
+            }
+            continue;
+        }
 
         for (let c = 0; c < brickColumnCount; c++) {
             if (!bricks[c]) continue;
