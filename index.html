@@ -2,56 +2,64 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>快打磚塊 - 10 關卡豪華旗艦版 (AI 自動代打 & 暫停功能)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>快打磚塊 - Apple Style Deluxe Edition</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=SF+Pro+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
             user-select: none;
             -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
-        }
-        html, body {
-            background: #04040c;
             margin: 0;
             padding: 0;
-            width: 100vw;
-            height: 100dvh;
-            height: 100vh;
+        }
+        :root {
+            --sat: env(safe-area-inset-top, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
+            --sal: env(safe-area-inset-left, 0px);
+            --sar: env(safe-area-inset-right, 0px);
+            --apple-rose: #ff4d6d;
+            --apple-rose-light: #fff0f3;
+            --apple-rose-dark: #c9184a;
+            --apple-rose-gradient: linear-gradient(135deg, #ff758f 0%, #ff4d6d 50%, #c9184a 100%);
+            --glass-bg: rgba(255, 255, 255, 0.72);
+            --glass-border: rgba(255, 255, 255, 0.85);
+            --glass-shadow: 0 10px 30px rgba(255, 77, 109, 0.12);
+        }
+        html, body {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: #04040c;
+            color: #1d1d1f;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            touch-action: none;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #ffffff;
-            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
-            overflow: hidden;
-            touch-action: none;
         }
-        #game-container {
+
+        #app-root {
             position: relative;
-            width: 100vw;
-            height: 100dvh;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             max-width: 480px;
             background: #000;
             overflow: hidden;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.95);
             display: flex;
             flex-direction: column;
         }
-        @media (max-width: 600px) {
-            #game-container {
-                max-width: 100vw;
-                border-radius: 0;
-            }
-        }
+
         canvas {
             display: block;
             width: 100%;
             height: 100%;
-            transition: background 0.5s ease;
+            transition: background 0.4s ease;
         }
 
         /* CRT 復古掃描線濾鏡特效 */
@@ -67,487 +75,770 @@
             z-index: 8;
         }
 
-        /* 頂部導覽列與狀態區 */
-        #ui-header {
+        /* 頂部 HUD 狀態列 */
+        #game-hud {
             position: absolute;
-            top: 8px;
-            left: 8px;
-            right: 8px;
-            display: flex;
+            top: calc(8px + var(--sat));
+            left: 10px;
+            right: 10px;
+            display: none;
             justify-content: space-between;
             align-items: center;
             font-size: 12px;
             font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            pointer-events: none;
             z-index: 5;
-            gap: 4px;
+            pointer-events: none;
         }
-        .header-left, .header-right {
+        .hud-left, .hud-right {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
             pointer-events: auto;
         }
-        .score-box {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 4px 7px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+        .hud-pill {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            gap: 3px;
+            gap: 4px;
+            font-size: 11px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.6);
         }
-        .score-box span {
+        .hud-pill span {
             color: #00d2ff;
             font-weight: 800;
         }
-        .lives-box span {
-            color: #ff006e;
-            letter-spacing: 1px;
-            font-size: 10px;
-        }
-        #level-badge {
-            background: linear-gradient(135deg, #ff006e, #8338ec);
+        .hud-btn {
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             color: #fff;
             padding: 4px 8px;
-            border-radius: 14px;
-            font-weight: 800;
+            border-radius: 10px;
             font-size: 11px;
-            box-shadow: 0 0 10px rgba(255, 0, 110, 0.4);
-        }
-        .top-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            color: #fff;
-            font-size: 11px;
-            padding: 4px 8px;
-            border-radius: 8px;
-            cursor: pointer;
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 2px;
+            cursor: pointer;
             transition: all 0.2s ease;
         }
-        .top-btn.active {
-            background: rgba(0, 245, 212, 0.3);
+        .hud-btn.active {
+            background: rgba(0, 245, 212, 0.35);
             border-color: #00f5d4;
             color: #00f5d4;
-            box-shadow: 0 0 10px rgba(0, 245, 212, 0.5);
+            box-shadow: 0 0 10px rgba(0, 245, 212, 0.4);
         }
 
-        /* 底部控制區域 (左右按鈕靠兩邊) */
-        #controls {
+        /* 底部控制按鈕 (分立兩側，精確避開瀏覽器工具列) */
+        #game-controls {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            height: 100px;
-            display: flex;
+            height: calc(90px + var(--sab));
+            padding-bottom: var(--sab);
+            display: none;
             justify-content: space-between;
             align-items: center;
-            padding: 0 18px 15px 18px;
+            padding-left: 20px;
+            padding-right: 20px;
             pointer-events: none;
             z-index: 5;
         }
-        .btn {
-            width: 70px;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1.5px solid rgba(255, 255, 255, 0.3);
+        .ctrl-btn {
+            width: 68px;
+            height: 68px;
+            background: rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 30px;
+            font-size: 28px;
             color: #fff;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.5), 0 0 15px rgba(0, 210, 255, 0.2);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5), 0 0 15px rgba(255, 255, 255, 0.1);
             cursor: pointer;
             pointer-events: auto;
             transition: transform 0.1s ease, background 0.1s ease, border-color 0.1s ease;
         }
-        .btn:active, .btn.active {
-            background: rgba(0, 210, 255, 0.35);
+        .ctrl-btn:active, .ctrl-btn.active {
+            background: rgba(0, 210, 255, 0.4);
             border-color: #00d2ff;
             transform: scale(0.9);
             box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
         }
 
-        /* 特殊雷射與發射按鈕 */
+        /* 發射彈珠/雷射按鈕 */
         #action-btn {
             position: absolute;
-            bottom: 95px;
+            bottom: calc(95px + var(--sab));
             right: 20px;
             padding: 10px 18px;
-            background: linear-gradient(135deg, #ff006e, #fb5607);
-            border: 2px solid #fff;
+            background: var(--apple-rose-gradient);
+            border: 1.5px solid #fff;
             border-radius: 25px;
             color: #fff;
             font-weight: 800;
-            font-size: 14px;
-            box-shadow: 0 0 20px rgba(255, 0, 110, 0.6);
+            font-size: 13px;
+            box-shadow: 0 6px 20px rgba(255, 77, 109, 0.6);
             display: none;
             cursor: pointer;
             pointer-events: auto;
             z-index: 6;
-            animation: pulse-btn 0.8s infinite alternate;
+            animation: pulse-action 0.8s infinite alternate;
         }
-        @keyframes pulse-btn {
-            0% { transform: scale(0.95); box-shadow: 0 0 10px rgba(255, 0, 110, 0.5); }
-            100% { transform: scale(1.05); box-shadow: 0 0 25px rgba(255, 0, 110, 0.9); }
+        @keyframes pulse-action {
+            0% { transform: scale(0.96); box-shadow: 0 0 10px rgba(255, 77, 109, 0.5); }
+            100% { transform: scale(1.04); box-shadow: 0 0 22px rgba(255, 77, 109, 0.9); }
         }
 
         /* 浮動提示文字 */
         #floating-notice {
             position: absolute;
-            top: 45%;
+            top: 42%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 800;
             color: #00f5d4;
             text-shadow: 0 0 15px rgba(0, 245, 212, 0.8);
             pointer-events: none;
             opacity: 0;
-            transition: all 0.4s ease;
+            transition: all 0.35s ease;
             z-index: 7;
             text-align: center;
             white-space: nowrap;
         }
 
-        /* 暫停彈窗畫面 (Pause Modal) */
-        #pause-modal {
+        /* =======================================================
+           1. 遊戲首頁 (Apple Soft Rose Style)
+           ======================================================= */
+        #home-screen {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(4, 4, 15, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            inset: 0;
+            background: linear-gradient(145deg, #fff5f7 0%, #ffe3e8 45%, #ffd1dc 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: calc(24px + var(--sat)) 20px calc(24px + var(--sab)) 20px;
+            z-index: 20;
+            overflow-y: auto;
+            text-align: center;
+        }
+        .apple-hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 77, 109, 0.12);
+            color: var(--apple-rose-dark);
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 77, 109, 0.25);
+        }
+        .hero-icon-box {
+            width: 90px;
+            height: 90px;
+            background: var(--apple-rose-gradient);
+            border-radius: 26px;
+            box-shadow: 0 14px 30px rgba(255, 77, 109, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .hero-icon-box svg {
+            width: 56px;
+            height: 56px;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.2));
+        }
+        .apple-title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #2b0914 0%, #800f2f 60%, #c9184a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+        .apple-subtitle {
+            font-size: 14px;
+            color: #7a5c65;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .home-actions {
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .btn-apple-primary {
+            background: var(--apple-rose-gradient);
+            color: #ffffff;
+            border: none;
+            padding: 15px 0;
+            border-radius: 30px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(255, 77, 109, 0.42);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-apple-primary:active {
+            transform: scale(0.97);
+        }
+        .btn-apple-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            color: #590d22;
+            padding: 13px 0;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+            transition: transform 0.15s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-apple-glass:active {
+            transform: scale(0.97);
+        }
+
+        .home-footer-stats {
+            display: flex;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+            padding: 8px 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            font-weight: 600;
+            color: #800f2f;
+        }
+        .home-footer-stats span {
+            color: var(--apple-rose-dark);
+            font-weight: 800;
+        }
+
+        /* =======================================================
+           2. 關卡選擇彈窗 (Level Selection Modal)
+           ======================================================= */
+        #level-modal {
+            position: absolute;
+            inset: 0;
+            background: rgba(24, 6, 12, 0.75);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: calc(20px + var(--sat)) 16px calc(20px + var(--sab)) 16px;
+            z-index: 25;
+        }
+        .modal-header-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+        .modal-header-bar h3 {
+            font-size: 20px;
+            font-weight: 800;
+        }
+        .btn-close-modal {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .level-grid-container {
+            width: 100%;
+            max-width: 360px;
+            max-height: 65vh;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .level-item-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            padding: 10px 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            color: #fff;
+        }
+        .level-item-card.selected, .level-item-card:hover {
+            background: rgba(255, 77, 109, 0.28);
+            border-color: #ff4d6d;
+            box-shadow: 0 0 15px rgba(255, 77, 109, 0.4);
+            transform: translateY(-2px);
+        }
+        .lvl-item-title {
+            font-size: 13px;
+            font-weight: 800;
+        }
+        .lvl-item-subtitle {
+            font-size: 10px;
+            color: #ffb3c1;
+            margin-top: 2px;
+        }
+
+        /* =======================================================
+           3. 結算與停止畫面 (Result / Stop Screen)
+           ======================================================= */
+        #result-modal {
+            position: absolute;
+            inset: 0;
+            background: rgba(8, 6, 14, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 15;
+            padding: 24px;
+            z-index: 30;
             text-align: center;
         }
-        #pause-modal h2 {
-            font-size: 32px;
-            margin: 0 0 20px 0;
-            color: #00d2ff;
-            text-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
-        }
-        .modal-btns {
+        .result-card {
+            width: 100%;
+            max-width: 320px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1.5px solid rgba(255, 255, 255, 0.25);
+            border-radius: 24px;
+            padding: 24px 18px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            width: 200px;
+            align-items: center;
         }
-        .modal-btn {
-            padding: 12px 0;
-            font-size: 16px;
-            font-weight: 700;
-            border-radius: 25px;
-            border: none;
-            cursor: pointer;
+        #result-title {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 6px;
             color: #fff;
-            background: linear-gradient(135deg, #00d2ff, #0072ff);
-            box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
         }
-        .modal-btn.secondary {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: none;
+        #result-desc {
+            font-size: 13px;
+            color: #c9cde0;
+            margin-bottom: 18px;
+        }
+        .result-score-box {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 14px;
+            padding: 10px 24px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            color: #fff;
+        }
+        .result-score-box span {
+            font-size: 24px;
+            font-weight: 800;
+            color: #00f5d4;
+            display: block;
+        }
+        .result-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
         }
 
-        /* Overlay 選單與 10 關卡選擇畫面 */
-        #overlay {
+        /* 說明彈窗 (Help Modal) */
+        #help-modal {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(4, 4, 15, 0.94);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            display: flex;
+            inset: 0;
+            background: rgba(24, 6, 12, 0.85);
+            backdrop-filter: blur(25px);
+            display: none;
             flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: calc(20px + var(--sat)) 20px calc(20px + var(--sab)) 20px;
+            z-index: 35;
+            color: #fff;
+        }
+        .help-content {
+            width: 100%;
+            max-width: 340px;
+            max-height: 68vh;
+            overflow-y: auto;
+            text-align: left;
+            font-size: 13px;
+            line-height: 1.5;
+            padding: 4px;
+        }
+        .capsule-list-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 8px 12px;
+            border-radius: 12px;
+        }
+        .capsule-badge {
+            width: 28px;
+            height: 18px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 800;
+            display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 10;
-            padding: 14px;
-            text-align: center;
-        }
-        #overlay h1 {
-            font-size: 28px;
-            font-weight: 800;
-            margin: 0 0 2px 0;
-            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 25px rgba(0, 210, 255, 0.4);
-        }
-        #overlay p {
-            font-size: 12px;
-            color: #a0a5c0;
-            margin: 0 0 10px 0;
-            line-height: 1.3;
-        }
-        .level-scroll-box {
-            max-height: 52dvh;
-            max-height: 52vh;
-            overflow-y: auto;
-            width: 100%;
-            max-width: 360px;
-            margin-bottom: 12px;
-            padding: 4px;
-            -webkit-overflow-scrolling: touch;
-        }
-        .level-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            width: 100%;
-        }
-        .level-card {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
-            padding: 8px 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .level-card:hover, .level-card.selected {
-            background: rgba(0, 210, 255, 0.2);
-            border-color: #00d2ff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
-        }
-        .level-card .lvl-title {
-            font-size: 12px;
-            font-weight: 800;
             color: #fff;
-        }
-        .level-card .lvl-desc {
-            font-size: 9px;
-            color: #8fa0c5;
-            margin-top: 2px;
-        }
-        .start-btn {
-            background: linear-gradient(135deg, #00d2ff 0%, #0072ff 100%);
-            color: #fff;
-            border: none;
-            padding: 11px 34px;
-            font-size: 16px;
-            font-weight: 700;
-            border-radius: 25px;
-            cursor: pointer;
-            box-shadow: 0 6px 20px rgba(0, 210, 255, 0.4);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .start-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 210, 255, 0.6);
-        }
-        .stats-summary {
-            font-size: 15px;
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
 
-<div id="game-container">
+<div id="app-root">
     <div id="floating-notice"></div>
 
-    <!-- 頂部狀態與控制按鈕 (含暫停與 AI 開關) -->
-    <div id="ui-header">
-        <div class="header-left">
-            <div class="score-box">分: <span id="score">0</span></div>
-            <div class="score-box lives-box">命: <span id="lives">❤️❤️❤️</span></div>
-            <div id="level-badge">LV 1</div>
+    <!-- 1. 遊戲首頁 (Apple Soft Rose UI) -->
+    <div id="home-screen">
+        <div class="apple-hero">
+            <div class="hero-badge">✨ 旗艦 10 關卡 2.0</div>
+            <div class="hero-icon-box">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="8" y="12" width="14" height="8" rx="2" fill="#FFE5EC" />
+                    <rect x="25" y="12" width="14" height="8" rx="2" fill="#FFB3C1" />
+                    <rect x="42" y="12" width="14" height="8" rx="2" fill="#FF758F" />
+                    <rect x="16" y="23" width="14" height="8" rx="2" fill="#FF4D6D" />
+                    <rect x="34" y="23" width="14" height="8" rx="2" fill="#C9184A" />
+                    <circle cx="32" cy="39" r="4.5" fill="#FFF" />
+                    <rect x="18" y="48" width="28" height="6" rx="3" fill="#FFF" />
+                </svg>
+            </div>
+            <h1 class="apple-title">快打磚塊</h1>
+            <p class="apple-subtitle">經典街機手感 × 智慧 AI 代打<br>專為手機觸控體驗打造</p>
         </div>
-        <div class="header-right">
-            <button id="pause-btn" class="top-btn">⏸ 暫停</button>
-            <button id="ai-btn" class="top-btn">🤖 AI代打</button>
-            <button id="crt-btn" class="top-btn">CRT</button>
+
+        <div class="home-actions">
+            <button id="home-start-btn" class="btn-apple-primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                開始遊戲
+            </button>
+            <button id="home-level-btn" class="btn-apple-glass">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+                關卡選擇 (LV 1 ~ 10)
+            </button>
+            <button id="home-help-btn" class="btn-apple-glass" style="font-size: 13px; padding: 10px 0;">
+                📖 道具說明與操作指引
+            </button>
+        </div>
+
+        <div class="home-footer-stats">
+            <div>最高得分: <span id="home-highscore">0</span></div>
+            <div>目前關卡: <span id="home-selected-lvl">LV 1</span></div>
         </div>
     </div>
 
-    <!-- 暫停畫面 (Pause Modal) -->
-    <div id="pause-modal">
-        <h2>⏸ 遊戲暫停中</h2>
-        <div class="modal-btns">
-            <button id="resume-btn" class="modal-btn">繼續遊戲</button>
-            <button id="restart-btn" class="modal-btn secondary">重新開始</button>
+    <!-- 2. 關卡選擇彈窗 (Level Selection Modal) -->
+    <div id="level-modal">
+        <div class="modal-header-bar">
+            <h3>🗺️ 選擇挑戰關卡</h3>
+            <button id="close-level-modal" class="btn-close-modal">← 返回首頁</button>
         </div>
+        <div class="level-grid-container" id="level-grid">
+            <!-- 動態生成 10 個關卡卡片 -->
+        </div>
+        <button id="level-start-btn" class="btn-apple-primary" style="width: 100%; max-width: 320px; margin-top: 10px;">
+            確認並開始此關
+        </button>
     </div>
-    
-    <!-- 關卡選單 (10 關卡) -->
-    <div id="overlay">
-        <h1 id="overlay-title">快打磚塊</h1>
-        <p id="overlay-desc">10大關卡漸進挑戰 / 支援 AI 自動代打與暫停<br><span style="font-size: 11px; color: #787f9d;">(每關專屬擋板、背景風格與多樣化磚塊)</span></p>
-        
-        <div class="level-scroll-box">
-            <div class="level-grid" id="level-selector">
-                <div class="level-card selected" data-level="1">
-                    <div class="lvl-title">LV 1. 經典初階</div>
-                    <div class="lvl-desc">標準彩磚 / 溫和節奏</div>
-                </div>
-                <div class="level-card" data-level="2">
-                    <div class="lvl-title">LV 2. 翡翠綠野</div>
-                    <div class="lvl-desc">密集矩陣 / 柔和微風</div>
-                </div>
-                <div class="level-card" data-level="3">
-                    <div class="lvl-title">LV 3. 疾速雙擊</div>
-                    <div class="lvl-desc">強化粉磚 / 疾速球速</div>
-                </div>
-                <div class="level-card" data-level="4">
-                    <div class="lvl-title">LV 4. 鋼鐵防線</div>
-                    <div class="lvl-desc">不可破壞鋼磚障礙</div>
-                </div>
-                <div class="level-card" data-level="5">
-                    <div class="lvl-title">LV 5. 炸彈連環</div>
-                    <div class="lvl-desc">多重💣炸彈連鎖爆破</div>
-                </div>
-                <div class="level-card" data-level="6">
-                    <div class="lvl-title">LV 6. 鑽石迷陣</div>
-                    <div class="lvl-desc">菱形陣列 / 3擊重磚</div>
-                </div>
-                <div class="level-card" data-level="7">
-                    <div class="lvl-title">LV 7. 幽靈小兵</div>
-                    <div class="lvl-desc">頻繁飛行小兵干擾</div>
-                </div>
-                <div class="level-card" data-level="8">
-                    <div class="lvl-title">LV 8. 狹縫穿梭</div>
-                    <div class="lvl-desc">極窄入口 / 暴速反彈</div>
-                </div>
-                <div class="level-card" data-level="9">
-                    <div class="lvl-title">LV 9. 烈焰煉獄</div>
-                    <div class="lvl-desc">極速熔岩 / 雙重障礙</div>
-                </div>
-                <div class="level-card" data-level="10">
-                    <div class="lvl-title">LV 10. DOH終極魔王</div>
-                    <div class="lvl-desc">摩艾頭像 / 雙電漿彈幕</div>
-                </div>
+
+    <!-- 3. 說明彈窗 (Help Modal) -->
+    <div id="help-modal">
+        <div class="modal-header-bar">
+            <h3>📖 道具與玩法說明</h3>
+            <button id="close-help-modal" class="btn-close-modal">關閉</button>
+        </div>
+        <div class="help-content">
+            <p style="margin-bottom: 12px; color: #ffb3c1;">打碎磚塊時有機率掉落強化膠囊，接住後可獲得強大特殊技能：</p>
+            <div class="capsule-list-item">
+                <div class="capsule-badge" style="background:#ff5400;">L</div>
+                <div><strong>雷射砲 (Laser)</strong>：擋板配備雙雷射砲，可直接射毀上方磚塊。</div>
+            </div>
+            <div class="capsule-list-item">
+                <div class="capsule-badge" style="background:#3a86ff;">E</div>
+                <div><strong>擴大板 (Expand)</strong>：擋板長度增加 1.5 倍（持續 18 秒）。</div>
+            </div>
+            <div class="capsule-list-item">
+                <div class="capsule-badge" style="background:#00f5d4; color:#000;">C</div>
+                <div><strong>黏球磁力 (Catch)</strong>：球接觸擋板時黏住，可重新瞄準自選時機發射。</div>
+            </div>
+            <div class="capsule-list-item">
+                <div class="capsule-badge" style="background:#00d2ff; color:#000;">D</div>
+                <div><strong>三球分裂 (Disrupt)</strong>：瞬間分裂為 3 顆球同場作戰。</div>
+            </div>
+            <div class="capsule-list-item">
+                <div class="capsule-badge" style="background:#ffbe0b; color:#000;">S</div>
+                <div><strong>減速球 (Slow)</strong>：將過快暴衝的球體降回基礎舒適速度。</div>
+            </div>
+            <div class="capsule-list-item">
+                <div class="capsule-badge" style="background:#a0aec0;">P</div>
+                <div><strong>額外生命 (+1 Life)</strong>：直接增加 1 條生命（❤️）。</div>
             </div>
         </div>
-
-        <div id="overlay-stats" class="stats-summary" style="display: none;"></div>
-        <button id="start-button" class="start-btn">開始遊戲</button>
+        <div style="font-size: 11px; color: #a0aec0; margin-top: 10px;">提示：開局或扣命後，彈珠會先黏在擋板上供您自由瞄準定位！</div>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
-    
-    <!-- 額外雷射發射/放球鍵 -->
-    <div id="action-btn">🔥 發射雷射</div>
+    <!-- 4. 結算與停止畫面 (Result Modal) -->
+    <div id="result-modal">
+        <div class="result-card">
+            <div id="result-title">🎉 關卡通關！</div>
+            <div id="result-desc">恭喜擊破所有目標磚塊！</div>
+            <div class="result-score-box">
+                本次得分
+                <span id="result-score">0</span>
+            </div>
+            <div class="result-actions">
+                <button id="result-next-btn" class="btn-apple-primary">進入下一關</button>
+                <button id="result-retry-btn" class="btn-apple-glass">🔄 再玩一次</button>
+                <button id="result-home-btn" class="btn-apple-glass">🏠 返回首頁</button>
+            </div>
+        </div>
+    </div>
 
-    <!-- 左右控制按鈕 (分立螢幕右下與左下) -->
-    <div id="controls">
-        <div class="btn" id="leftBtn">←</div>
-        <div class="btn" id="rightBtn">→</div>
+    <!-- 5. 遊戲畫面與 HUD -->
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="game-hud">
+        <div class="hud-left">
+            <div class="hud-pill">分: <span id="hud-score">0</span></div>
+            <div class="hud-pill">命: <span id="hud-lives">❤️❤️❤️</span></div>
+            <div class="hud-pill" id="hud-level-badge" style="background: var(--apple-rose-gradient); font-weight:800;">LV 1</div>
+        </div>
+        <div class="hud-right">
+            <button id="hud-pause-btn" class="hud-btn">⏸ 暫停</button>
+            <button id="hud-ai-btn" class="hud-btn">🤖 AI</button>
+            <button id="hud-home-btn" class="hud-btn">🏠 首頁</button>
+        </div>
+    </div>
+
+    <!-- 發射按鈕 -->
+    <div id="action-btn">🚀 發射彈珠</div>
+
+    <!-- 左右控制按鈕 (分立兩邊) -->
+    <div id="game-controls">
+        <div class="ctrl-btn" id="leftBtn">←</div>
+        <div class="ctrl-btn" id="rightBtn">→</div>
     </div>
 </div>
 
 <script>
-const container = document.getElementById('game-container');
+const container = document.getElementById('app-root');
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const scoreEl = document.getElementById('score');
-const livesEl = document.getElementById('lives');
-const levelBadge = document.getElementById('level-badge');
-const pauseBtn = document.getElementById('pause-btn');
-const aiBtn = document.getElementById('ai-btn');
-const crtBtn = document.getElementById('crt-btn');
-const pauseModal = document.getElementById('pause-modal');
-const resumeBtn = document.getElementById('resume-btn');
-const restartBtn = document.getElementById('restart-btn');
-const floatingNotice = document.getElementById('floating-notice');
-const overlay = document.getElementById('overlay');
-const overlayTitle = document.getElementById('overlay-title');
-const overlayDesc = document.getElementById('overlay-desc');
-const overlayStats = document.getElementById('overlay-stats');
-const startBtn = document.getElementById('start-button');
+
+// UI 元件參照
+const homeScreen = document.getElementById('home-screen');
+const homeStartBtn = document.getElementById('home-start-btn');
+const homeLevelBtn = document.getElementById('home-level-btn');
+const homeHelpBtn = document.getElementById('home-help-btn');
+const homeHighscore = document.getElementById('home-highscore');
+const homeSelectedLvl = document.getElementById('home-selected-lvl');
+
+const levelModal = document.getElementById('level-modal');
+const levelGrid = document.getElementById('level-grid');
+const closeLevelModal = document.getElementById('close-level-modal');
+const levelStartBtn = document.getElementById('level-start-btn');
+
+const helpModal = document.getElementById('help-modal');
+const closeHelpModal = document.getElementById('close-help-modal');
+
+const resultModal = document.getElementById('result-modal');
+const resultTitle = document.getElementById('result-title');
+const resultDesc = document.getElementById('result-desc');
+const resultScore = document.getElementById('result-score');
+const resultNextBtn = document.getElementById('result-next-btn');
+const resultRetryBtn = document.getElementById('result-retry-btn');
+const resultHomeBtn = document.getElementById('result-home-btn');
+
+const gameHud = document.getElementById('game-hud');
+const hudScore = document.getElementById('hud-score');
+const hudLives = document.getElementById('hud-lives');
+const hudLevelBadge = document.getElementById('hud-level-badge');
+const hudPauseBtn = document.getElementById('hud-pause-btn');
+const hudAiBtn = document.getElementById('hud-ai-btn');
+const hudHomeBtn = document.getElementById('hud-home-btn');
+
+const gameControls = document.getElementById('game-controls');
 const actionBtn = document.getElementById('action-btn');
 const leftBtn = document.getElementById('leftBtn');
 const rightBtn = document.getElementById('rightBtn');
-const levelCards = document.querySelectorAll('.level-card');
+const floatingNotice = document.getElementById('floating-notice');
 
 let highscore = parseInt(localStorage.getItem('brick_highscore') || '0', 10);
+homeHighscore.innerText = highscore;
 
 let selectedLevel = 1;
 let currentLevel = 1;
 let dpr = window.devicePixelRatio || 1;
 let width = 0;
 let height = 0;
+const controlsAreaHeight = 90;
 
-const controlsAreaHeight = 100;
-
-// 10 關卡專屬主題風格設定 (Backgrounds, Paddle Colors, Brick Palettes)
+// 10 關卡主題設計
 const LEVEL_THEMES = {
-    1: { name: "經典初階", bg: "radial-gradient(circle at center, #151336 0%, #04030f 100%)", paddle: ['#00d2ff', '#0072ff'], shadow: '#00d2ff' },
-    2: { name: "翡翠綠野", bg: "radial-gradient(circle at center, #0b2e23 0%, #03130e 100%)", paddle: ['#00f5d4', '#058c70'], shadow: '#00f5d4' },
-    3: { name: "疾速雙擊", bg: "radial-gradient(circle at center, #350d2e 0%, #12030f 100%)", paddle: ['#ff006e', '#8338ec'], shadow: '#ff006e' },
-    4: { name: "鋼鐵防線", bg: "radial-gradient(circle at center, #1e2638 0%, #0a0e17 100%)", paddle: ['#a0aec0', '#4a5568'], shadow: '#cbd5e0' },
-    5: { name: "炸彈連環", bg: "radial-gradient(circle at center, #3a1c06 0%, #150902 100%)", paddle: ['#ffbe0b', '#fb5607'], shadow: '#ffbe0b' },
-    6: { name: "鑽石迷陣", bg: "radial-gradient(circle at center, #0d2838 0%, #041018 100%)", paddle: ['#3a86ff', '#00f5d4'], shadow: '#3a86ff' },
-    7: { name: "幽靈小兵", bg: "radial-gradient(circle at center, #261138 0%, #0f0417 100%)", paddle: ['#8338ec', '#ff006e'], shadow: '#8338ec' },
-    8: { name: "狹縫穿梭", bg: "radial-gradient(circle at center, #1c1a3a 0%, #060517 100%)", paddle: ['#00d2ff', '#ffbe0b'], shadow: '#00d2ff' },
-    9: { name: "烈焰煉獄", bg: "radial-gradient(circle at center, #420d09 0%, #1a0302 100%)", paddle: ['#ff0055', '#ff5400'], shadow: '#ff0055' },
-    10: { name: "DOH魔王", bg: "radial-gradient(circle at center, #2a2005 0%, #0e0a02 100%)", paddle: ['#ffd700', '#ff8c00'], shadow: '#ffd700' }
+    1: { name: "經典初階", desc: "標準彩磚 / 溫和節奏", bg: "radial-gradient(circle at center, #151336 0%, #04030f 100%)", paddle: ['#00d2ff', '#0072ff'], shadow: '#00d2ff' },
+    2: { name: "翡翠綠野", desc: "密集矩陣 / 柔和微風", bg: "radial-gradient(circle at center, #0b2e23 0%, #03130e 100%)", paddle: ['#00f5d4', '#058c70'], shadow: '#00f5d4' },
+    3: { name: "疾速雙擊", desc: "強化粉磚 / 疾速球速", bg: "radial-gradient(circle at center, #350d2e 0%, #12030f 100%)", paddle: ['#ff006e', '#8338ec'], shadow: '#ff006e' },
+    4: { name: "鋼鐵防線", desc: "不可破壞鋼磚障礙", bg: "radial-gradient(circle at center, #1e2638 0%, #0a0e17 100%)", paddle: ['#a0aec0', '#4a5568'], shadow: '#cbd5e0' },
+    5: { name: "炸彈連環", desc: "💣炸彈連鎖爆破", bg: "radial-gradient(circle at center, #3a1c06 0%, #150902 100%)", paddle: ['#ffbe0b', '#fb5607'], shadow: '#ffbe0b' },
+    6: { name: "鑽石迷陣", desc: "菱形陣列 / 3擊重磚", bg: "radial-gradient(circle at center, #0d2838 0%, #041018 100%)", paddle: ['#3a86ff', '#00f5d4'], shadow: '#3a86ff' },
+    7: { name: "幽靈小兵", desc: "頻繁飛行小兵干擾", bg: "radial-gradient(circle at center, #261138 0%, #0f0417 100%)", paddle: ['#8338ec', '#ff006e'], shadow: '#8338ec' },
+    8: { name: "狹縫穿梭", desc: "極窄入口 / 暴速反彈", bg: "radial-gradient(circle at center, #1c1a3a 0%, #060517 100%)", paddle: ['#00d2ff', '#ffbe0b'], shadow: '#00d2ff' },
+    9: { name: "烈焰煉獄", desc: "極速熔岩 / 雙重障礙", bg: "radial-gradient(circle at center, #420d09 0%, #1a0302 100%)", paddle: ['#ff0055', '#ff5400'], shadow: '#ff0055' },
+    10: { name: "DOH終極魔王", desc: "摩艾頭像 / 雙電漿彈幕", bg: "radial-gradient(circle at center, #2a2005 0%, #0e0a02 100%)", paddle: ['#ffd700', '#ff8c00'], shadow: '#ffd700' }
 };
 
-// 狀態控制
-let isPaused = false;
-let isAiActive = false;
+// 動態建立 10 個關卡卡片
+function renderLevelCards() {
+    levelGrid.innerHTML = '';
+    for (let lvl = 1; lvl <= 10; lvl++) {
+        let t = LEVEL_THEMES[lvl];
+        let card = document.createElement('div');
+        card.className = `level-item-card ${lvl === selectedLevel ? 'selected' : ''}`;
+        card.dataset.level = lvl;
+        card.innerHTML = `
+            <div class="lvl-item-title">LV ${lvl}. ${t.name}</div>
+            <div class="lvl-item-subtitle">${t.desc}</div>
+        `;
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.level-item-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedLevel = lvl;
+            homeSelectedLvl.innerText = `LV ${selectedLevel}`;
+        });
+        levelGrid.appendChild(card);
+    }
+}
+renderLevelCards();
 
-// 暫停按鈕邏輯
-pauseBtn.addEventListener('click', togglePause);
-resumeBtn.addEventListener('click', togglePause);
-restartBtn.addEventListener('click', () => {
-    togglePause();
-    startGame();
+// 首頁按鈕導覽
+homeStartBtn.addEventListener('click', () => {
+    startGame(selectedLevel);
+});
+homeLevelBtn.addEventListener('click', () => {
+    levelModal.style.display = 'flex';
+});
+closeLevelModal.addEventListener('click', () => {
+    levelModal.style.display = 'none';
+});
+levelStartBtn.addEventListener('click', () => {
+    levelModal.style.display = 'none';
+    startGame(selectedLevel);
+});
+homeHelpBtn.addEventListener('click', () => {
+    helpModal.style.display = 'flex';
+});
+closeHelpModal.addEventListener('click', () => {
+    helpModal.style.display = 'none';
 });
 
-function togglePause() {
-    if (!gameRunning) return;
-    isPaused = !isPaused;
-    if (isPaused) {
-        if (animationId) cancelAnimationFrame(animationId);
-        pauseModal.style.display = 'flex';
-        pauseBtn.innerText = '▶ 繼續';
-        pauseBtn.classList.add('active');
-    } else {
-        pauseModal.style.display = 'none';
-        pauseBtn.innerText = '⏸ 暫停';
-        pauseBtn.classList.remove('active');
-        animationId = requestAnimationFrame(draw);
-    }
-    hapticFeedback(15);
-}
+// 結算畫面按鈕
+resultNextBtn.addEventListener('click', () => {
+    resultModal.style.display = 'none';
+    if (selectedLevel < 10) selectedLevel++;
+    startGame(selectedLevel);
+});
+resultRetryBtn.addEventListener('click', () => {
+    resultModal.style.display = 'none';
+    startGame(selectedLevel);
+});
+resultHomeBtn.addEventListener('click', () => {
+    resultModal.style.display = 'none';
+    exitToHome();
+});
 
-// AI 自動代打開關
-aiBtn.addEventListener('click', () => {
+// HUD 頂部按鈕
+hudHomeBtn.addEventListener('click', () => {
+    if (confirm("確定要暫停並返回遊戲首頁嗎？")) {
+        exitToHome();
+    }
+});
+hudPauseBtn.addEventListener('click', togglePause);
+hudAiBtn.addEventListener('click', () => {
     isAiActive = !isAiActive;
-    aiBtn.classList.toggle('active', isAiActive);
+    hudAiBtn.classList.toggle('active', isAiActive);
     showNotice(isAiActive ? '🤖 AI 自動代打已啟用' : '👤 切換回手動控制', isAiActive ? '#00f5d4' : '#a0aec0');
     hapticFeedback(20);
 });
 
-// CRT 街機濾鏡
-crtBtn.addEventListener('click', () => {
-    container.classList.toggle('crt-scanlines');
-    crtBtn.classList.toggle('active');
+function exitToHome() {
+    gameRunning = false;
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
+    if (enemyTimer) {
+        clearInterval(enemyTimer);
+        enemyTimer = null;
+    }
+    gameHud.style.display = 'none';
+    gameControls.style.display = 'none';
+    actionBtn.style.display = 'none';
+    homeScreen.style.display = 'flex';
+    homeHighscore.innerText = highscore;
+    homeSelectedLvl.innerText = `LV ${selectedLevel}`;
+}
+
+let isPaused = false;
+let isAiActive = false;
+
+function togglePause() {
+    if (!gameRunning) return;
+    isPaused = !isPaused;
+    hudPauseBtn.innerText = isPaused ? '▶ 繼續' : '⏸ 暫停';
+    hudPauseBtn.classList.toggle('active', isPaused);
+    showNotice(isPaused ? '⏸ 遊戲已暫停' : '▶ 遊戲繼續', '#00d2ff');
+    if (!isPaused) {
+        animationId = requestAnimationFrame(draw);
+    }
     hapticFeedback(15);
-});
+}
 
 function showNotice(text, color = '#00f5d4') {
     floatingNotice.innerText = text;
@@ -566,8 +857,9 @@ function hapticFeedback(pattern) {
     }
 }
 
+// 智慧螢幕適配 (針對 Chrome / Safari / Brave 視窗高度校準)
 function resize() {
-    const rect = canvas.getBoundingClientRect();
+    const rect = container.getBoundingClientRect();
     width = rect.width;
     height = rect.height;
     canvas.width = width * dpr;
@@ -584,6 +876,9 @@ function resize() {
     }
 }
 window.addEventListener('resize', resize);
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', resize);
+}
 
 // Web Audio API
 let audioCtx = null;
@@ -640,7 +935,7 @@ function playCustomLevelSound(soundType) {
     }
 }
 
-// 遊戲狀態物件
+// 實體與遊戲狀態
 let balls = [];
 let paddle = { 
     width: 80, 
@@ -661,7 +956,6 @@ let enemies = [];
 let enemyTimer = null;
 let boss = null;
 let bossProjectiles = [];
-let warpGate = null;
 
 let lives = 3;
 let score = 0;
@@ -675,17 +969,8 @@ let brickColumnCount = 5;
 let brickWidth = 0;
 let brickHeight = 18;
 let brickPadding = 7;
-let brickOffsetTop = 60;
+let brickOffsetTop = 65;
 let brickOffsetLeft = 14;
-
-// 關卡卡片點擊
-levelCards.forEach(card => {
-    card.addEventListener('click', () => {
-        levelCards.forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-        selectedLevel = parseInt(card.dataset.level, 10);
-    });
-});
 
 function createParticles(x, y, color, count = 10) {
     for (let i = 0; i < count; i++) {
@@ -723,12 +1008,12 @@ function updateParticles() {
 function updateLivesUI() {
     let hearts = '';
     for (let i = 0; i < lives; i++) hearts += '❤️';
-    livesEl.innerText = hearts || '💀';
+    hudLives.innerText = hearts || '💀';
 }
 
 function checkScoreMilestone(added) {
     score += added;
-    scoreEl.innerText = score;
+    hudScore.innerText = score;
     if (score >= nextLifeScore) {
         lives++;
         updateLivesUI();
@@ -766,22 +1051,20 @@ function resetBallAndPaddle(isStuck = true) {
     } else {
         actionBtn.style.display = 'none';
     }
-    warpGate = null;
 }
 
-// 7 款道具膠囊
+// 移除直接過關道具 (保留 L, E, C, D, S, P 6款)
 const CAPSULE_TYPES = [
     { type: 'L', letter: 'L', color: '#ff5400', label: '雷射砲 (Laser)' },
     { type: 'E', letter: 'E', color: '#3a86ff', label: '擴大板 (Expand)' },
     { type: 'C', letter: 'C', color: '#00f5d4', label: '黏球磁力 (Catch)' },
     { type: 'D', letter: 'D', color: '#00d2ff', label: '三球分裂 (Disrupt)' },
     { type: 'S', letter: 'S', color: '#ffbe0b', label: '減速球 (Slow)' },
-    { type: 'B', letter: 'B', color: '#ff006e', label: '跳關門 (Break)' },
     { type: 'P', letter: 'P', color: '#a0aec0', label: '+1 生命 (1UP)' }
 ];
 
 function spawnCapsule(x, y) {
-    if (Math.random() > 0.28) return;
+    if (Math.random() > 0.26) return;
     let item = CAPSULE_TYPES[Math.floor(Math.random() * CAPSULE_TYPES.length)];
     capsules.push({
         x: x, y: y,
@@ -820,9 +1103,6 @@ function applyPowerup(type, label) {
             b.dx = (b.dx > 0 ? 1 : -1) * 3.5;
             b.dy = (b.dy > 0 ? 1 : -1) * 3.5;
         });
-    } else if (type === 'B') {
-        warpGate = { x: width - 25, y: height / 2 - 40, width: 25, height: 80 };
-        showNotice('🚪 右側傳送門已開啟！', '#ff006e');
     } else if (type === 'P') {
         lives++;
         updateLivesUI();
@@ -830,7 +1110,6 @@ function applyPowerup(type, label) {
     }
 }
 
-// 飛行小兵生成
 function spawnEnemy() {
     if (!gameRunning || currentLevel < 2) return;
     enemies.push({
@@ -853,13 +1132,20 @@ function fireLaser() {
 }
 
 function releaseStuckBalls() {
+    let released = false;
     balls.forEach(b => {
         if (b.stuck) {
             b.stuck = false;
-            b.dy = -Math.abs(b.speed || 5);
+            b.dy = -Math.abs(b.speed || 5.2);
+            released = true;
         }
     });
+    if (released) {
+        playCustomLevelSound('paddle');
+        hapticFeedback(18);
+    }
     actionBtn.style.display = paddle.laserMode ? 'block' : 'none';
+    if (paddle.laserMode) actionBtn.innerText = '🔥 發射雷射';
 }
 
 actionBtn.addEventListener('click', () => {
@@ -868,11 +1154,10 @@ actionBtn.addEventListener('click', () => {
     releaseStuckBalls();
 });
 
-// AI 自動代打演算系統 (Predictive Ball Interception & Auto-Firing)
+// AI 自動代打
 function runAiLogic() {
     if (!isAiActive || balls.length === 0) return;
 
-    // 尋找最接近擋板且向下運行的球
     let targetBall = null;
     let lowestY = -1;
     balls.forEach(b => {
@@ -885,7 +1170,6 @@ function runAiLogic() {
 
     let predictedX = targetBall.x;
     if (!targetBall.stuck && targetBall.dy > 0) {
-        // 預測抵達擋板 Y 軸的 X 座標（計入左右牆壁反彈）
         let timeToReach = Math.max(1, (paddle.y - targetBall.y) / targetBall.dy);
         predictedX = targetBall.x + targetBall.dx * timeToReach;
         while (predictedX < 0 || predictedX > width) {
@@ -903,17 +1187,26 @@ function runAiLogic() {
         else paddle.x = Math.max(0, paddle.x - moveSpeed);
     }
 
-    // AI 自動發射雷射與放球
     if (paddle.laserMode && Math.random() < 0.12) fireLaser();
     if (targetBall.stuck) releaseStuckBalls();
 }
 
-function initGame() {
-    currentLevel = selectedLevel;
-    levelBadge.innerText = `LV ${currentLevel}`;
+function startGame(lvl) {
+    initAudio();
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
+    homeScreen.style.display = 'none';
+    levelModal.style.display = 'none';
+    resultModal.style.display = 'none';
+    gameHud.style.display = 'flex';
+    gameControls.style.display = 'flex';
+
+    currentLevel = lvl;
+    hudLevelBadge.innerText = `LV ${currentLevel}`;
     resize();
-    
-    // 更新畫布主題背景
+
     let theme = LEVEL_THEMES[currentLevel] || LEVEL_THEMES[1];
     canvas.style.background = theme.bg;
 
@@ -922,34 +1215,32 @@ function initGame() {
     nextLifeScore = 20000;
     comboStreak = 0;
     isPaused = false;
-    pauseModal.style.display = 'none';
-    pauseBtn.innerText = '⏸ 暫停';
+    hudPauseBtn.innerText = '⏸ 暫停';
+    hudPauseBtn.classList.remove('active');
 
     paddle.baseWidth = Math.max(65, Math.min(85, width * 0.22));
     paddle.width = paddle.baseWidth;
     paddle.y = height - controlsAreaHeight - paddle.height - 15;
-    
-    resetBallAndPaddle();
+
+    resetBallAndPaddle(true);
 
     brickColumnCount = currentLevel % 2 === 0 ? 6 : 5;
     brickRowCount = currentLevel === 10 ? 2 : (currentLevel >= 6 ? 6 : 5);
     brickWidth = (width - (brickOffsetLeft * 2) - (brickPadding * (brickColumnCount - 1))) / brickColumnCount;
-    
+
     bricks = [];
     boss = null;
     capsules = [];
     lasers = [];
     enemies = [];
     bossProjectiles = [];
-    warpGate = null;
 
     if (enemyTimer) clearInterval(enemyTimer);
     enemyTimer = setInterval(spawnEnemy, Math.max(6000, 14000 - currentLevel * 800));
 
     const colors = ['#ff006e', '#fb5607', '#ffbe0b', '#3a86ff', '#8338ec', '#00f5d4'];
-    
+
     if (currentLevel === 10) {
-        // Level 10: DOH 終極魔王戰
         boss = {
             x: width / 2 - 65,
             y: 65,
@@ -984,7 +1275,6 @@ function initGame() {
                 let color = colors[(r + currentLevel) % colors.length];
                 let scoreVal = 50 + r * 10;
 
-                // 根據關卡設定多樣化磚塊
                 if (currentLevel === 3 && (r === 0 || r === 1)) {
                     type = 'tough'; hp = 2; color = '#ff006e'; scoreVal = 120;
                 } else if (currentLevel === 4 && r === 2 && (c === 1 || c === 3)) {
@@ -997,7 +1287,7 @@ function initGame() {
                 } else if (currentLevel === 7 && r === 2 && c % 2 === 1) {
                     type = 'steel'; color = '#718096';
                 } else if (currentLevel === 8 && r === 2) {
-                    type = 'steel'; color = '#718096'; // 狹縫障礙
+                    type = 'steel'; color = '#718096';
                 } else if (currentLevel === 9) {
                     if (r === 0 || r === 1) { type = 'heavy'; hp = 3; color = '#ff0055'; scoreVal = 220; }
                     if (r === 2 && c === 2) { type = 'bomb'; color = '#ffbe0b'; scoreVal = 250; }
@@ -1017,11 +1307,55 @@ function initGame() {
     }
 
     score = 0;
-    scoreEl.innerText = score;
+    hudScore.innerText = score;
     particles = [];
+    gameRunning = true;
+    draw();
 }
 
-// 觸控雙重控制：微移單步與長按連續滑動
+// 結算與停止畫面顯示 (不再直接跳回首頁選關)
+function showResultScreen(isWin) {
+    gameRunning = false;
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
+    if (enemyTimer) {
+        clearInterval(enemyTimer);
+        enemyTimer = null;
+    }
+    if (paddle.expandTimer) {
+        clearTimeout(paddle.expandTimer);
+        paddle.expandTimer = null;
+    }
+    paddle.laserMode = false;
+    paddle.catchMode = false;
+    actionBtn.style.display = 'none';
+
+    if (score > highscore) {
+        highscore = score;
+        localStorage.setItem('brick_highscore', highscore);
+        homeHighscore.innerText = highscore;
+    }
+
+    resultScore.innerText = score;
+
+    if (isWin) {
+        playSound(600, 'sine', 0.1);
+        setTimeout(() => playSound(850, 'sine', 0.25), 100);
+        resultTitle.innerText = "🎉 關卡通關！";
+        resultDesc.innerText = `恭喜擊破 LV ${currentLevel} 所有目標！`;
+        resultNextBtn.style.display = currentLevel < 10 ? 'block' : 'none';
+    } else {
+        playSound(140, 'sawtooth', 0.4);
+        resultTitle.innerText = "💥 挑戰結束";
+        resultDesc.innerText = "生命值已耗盡，重整旗鼓再試一次！";
+        resultNextBtn.style.display = 'none';
+    }
+
+    resultModal.style.display = 'flex';
+}
+
 const keys = {};
 let tapStep = 22;
 
@@ -1076,13 +1410,16 @@ window.addEventListener('keyup', (e) => {
     if (['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'].includes(e.code)) keys[e.code] = false;
 });
 
-// 手勢滑動
+// 手勢滑動與點擊發射
 let isDragging = false;
 canvas.addEventListener('touchstart', (e) => {
     if (!gameRunning || isPaused) return;
+    initAudio();
     isDragging = true;
     movePaddleWithTouch(e.touches[0].clientX);
-    releaseStuckBalls();
+    if (balls.some(b => b.stuck)) {
+        releaseStuckBalls();
+    }
 }, { passive: true });
 
 canvas.addEventListener('touchmove', (e) => {
@@ -1096,71 +1433,6 @@ function movePaddleWithTouch(clientX) {
     const rect = canvas.getBoundingClientRect();
     const touchX = clientX - rect.left;
     paddle.x = Math.max(0, Math.min(width - paddle.width, touchX - paddle.width / 2));
-}
-
-startBtn.addEventListener('click', startGame);
-
-function startGame() {
-    initAudio();
-    if (animationId) {
-        cancelAnimationFrame(animationId);
-        animationId = null;
-    }
-    overlay.style.display = 'none';
-    gameRunning = true;
-    isPaused = false;
-    initGame();
-    draw();
-}
-
-function gameOver(isWin) {
-    gameRunning = false;
-    if (animationId) {
-        cancelAnimationFrame(animationId);
-        animationId = null;
-    }
-    if (enemyTimer) {
-        clearInterval(enemyTimer);
-        enemyTimer = null;
-    }
-    if (paddle.expandTimer) {
-        clearTimeout(paddle.expandTimer);
-        paddle.expandTimer = null;
-    }
-    paddle.laserMode = false;
-    paddle.catchMode = false;
-    actionBtn.style.display = 'none';
-    lasers = [];
-    capsules = [];
-    bossProjectiles = [];
-    enemies = [];
-
-    if (score > highscore) {
-        highscore = score;
-        localStorage.setItem('brick_highscore', highscore);
-    }
-
-    if (isWin) {
-        playSound(600, 'sine', 0.1);
-        setTimeout(() => playSound(850, 'sine', 0.25), 100);
-        overlayTitle.innerText = "🎉 關卡通關！";
-        overlayDesc.innerText = `恭喜擊破 ${levelBadge.innerText} 所有目標！`;
-    } else {
-        playSound(140, 'sawtooth', 0.4);
-        overlayTitle.innerText = "💥 挑戰失敗";
-        overlayDesc.innerText = "生命值已耗盡，調整節奏再試一次！";
-    }
-
-    overlayStats.style.display = 'block';
-    overlayStats.innerHTML = `本次得分: <span style="color:#00d2ff">${score}</span>`;
-    startBtn.innerText = isWin && selectedLevel < 10 ? "進入下一關" : "再試一次";
-    
-    if (isWin && selectedLevel < 10) {
-        selectedLevel++;
-        levelCards.forEach(c => c.classList.remove('selected'));
-        document.querySelector(`.level-card[data-level="${selectedLevel}"]`).classList.add('selected');
-    }
-    overlay.style.display = 'flex';
 }
 
 function triggerBombExplosion(centerC, centerR) {
@@ -1179,9 +1451,35 @@ function triggerBombExplosion(centerC, centerR) {
     }
 }
 
-function collisionDetection() {
-    let activeBreakables = 0;
+// 嚴謹過關判定 (完全遍歷統計剩餘磚塊，杜絕提前誤判過關)
+function checkLevelClearCondition() {
+    if (currentLevel === 10) {
+        if (boss && boss.hp <= 0) {
+            showResultScreen(true);
+            return true;
+        }
+        return false;
+    }
 
+    let remainingBreakables = 0;
+    for (let c = 0; c < brickColumnCount; c++) {
+        if (!bricks[c]) continue;
+        for (let r = 0; r < brickRowCount; r++) {
+            let b = bricks[c][r];
+            if (b && b.status === 1 && b.type !== 'steel') {
+                remainingBreakables++;
+            }
+        }
+    }
+
+    if (remainingBreakables === 0) {
+        showResultScreen(true);
+        return true;
+    }
+    return false;
+}
+
+function collisionDetection() {
     // Boss 碰撞
     if (boss && boss.hp > 0) {
         balls.forEach(ball => {
@@ -1194,7 +1492,7 @@ function collisionDetection() {
                 playCustomLevelSound('bossHit');
                 hapticFeedback(25);
                 if (boss.hp <= 0) {
-                    gameOver(true);
+                    showResultScreen(true);
                     return;
                 }
             }
@@ -1207,8 +1505,6 @@ function collisionDetection() {
         for (let r = 0; r < brickRowCount; r++) {
             let b = bricks[c][r];
             if (b && b.status === 1) {
-                if (b.type !== 'steel') activeBreakables++;
-
                 balls.forEach(ball => {
                     if (ball.x + ball.radius > b.x && ball.x - ball.radius < b.x + brickWidth && 
                         ball.y + ball.radius > b.y && ball.y - ball.radius < b.y + brickHeight) {
@@ -1238,32 +1534,28 @@ function collisionDetection() {
                                 playCustomLevelSound('brick');
                             }
                         }
-
-                        if (currentLevel !== 10 && activeBreakables - 1 <= 0) {
-                            gameOver(true);
-                            return;
-                        }
                     }
                 });
             }
         }
     }
+
+    // 每一影格碰撞後進行全面檢查
+    checkLevelClearCondition();
 }
 
 function draw() {
     if (!gameRunning || isPaused) return;
     ctx.clearRect(0, 0, width, height);
 
-    // AI 運算控制
     runAiLogic();
 
-    // 手動擋板移動
     if (!isAiActive) {
         if ((keys['ArrowLeft'] || keys['KeyA']) && paddle.x > 0) paddle.x -= paddle.speed;
         if ((keys['ArrowRight'] || keys['KeyD']) && paddle.x < width - paddle.width) paddle.x += paddle.speed;
     }
 
-    // 繪製 Boss (Level 10)
+    // Boss (Level 10)
     if (boss && boss.hp > 0) {
         boss.x += boss.dx;
         if (boss.x + boss.width > width - 10 || boss.x < 10) boss.dx = -boss.dx;
@@ -1295,7 +1587,7 @@ function draw() {
         }
     }
 
-    // 更新與繪製 Boss 彈幕
+    // Boss 彈幕
     for (let i = bossProjectiles.length - 1; i >= 0; i--) {
         let p = bossProjectiles[i];
         p.y += p.dy;
@@ -1316,7 +1608,7 @@ function draw() {
         }
     }
 
-    // 繪製磚塊
+    // 磚塊繪製
     for (let c = 0; c < brickColumnCount; c++) {
         if (!bricks[c]) continue;
         for (let r = 0; r < brickRowCount; r++) {
@@ -1349,19 +1641,6 @@ function draw() {
                 ctx.restore();
             }
         }
-    }
-
-    // 繪製傳送門
-    if (warpGate) {
-        ctx.save();
-        ctx.fillStyle = '#ff006e';
-        ctx.shadowColor = '#ff006e';
-        ctx.shadowBlur = 20;
-        ctx.fillRect(warpGate.x, warpGate.y, warpGate.width, warpGate.height);
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 10px sans-serif';
-        ctx.fillText('WARP', warpGate.x + 2, warpGate.y + 45);
-        ctx.restore();
     }
 
     // 道具膠囊
@@ -1399,7 +1678,6 @@ function draw() {
         ctx.shadowBlur = 10;
         ctx.fillRect(l.x, l.y, l.width, l.height);
 
-        // 雷射擊中 Boss
         if (boss && boss.hp > 0 && l.x >= boss.x && l.x <= boss.x + boss.width && l.y >= boss.y && l.y <= boss.y + boss.height) {
             boss.hp--;
             checkScoreMilestone(150);
@@ -1408,7 +1686,7 @@ function draw() {
             hapticFeedback(15);
             lasers.splice(i, 1);
             if (boss.hp <= 0) {
-                gameOver(true);
+                showResultScreen(true);
                 return;
             }
             continue;
@@ -1467,10 +1745,9 @@ function draw() {
         if (en.y > height) enemies.splice(i, 1);
     }
 
-    // 粒子效果
     updateParticles();
 
-    // 繪製關卡專屬風格擋板
+    // 擋板
     let theme = LEVEL_THEMES[currentLevel] || LEVEL_THEMES[1];
     ctx.save();
     ctx.beginPath();
@@ -1491,7 +1768,7 @@ function draw() {
     ctx.fill();
     ctx.restore();
 
-    // 多球更新與繪製
+    // 球體
     for (let i = balls.length - 1; i >= 0; i--) {
         let ball = balls[i];
 
@@ -1499,10 +1776,9 @@ function draw() {
             ball.x = paddle.x + ball.stuckOffset;
             ball.y = paddle.y - ball.radius;
 
-            // 繪製發射瞄準虛線 (Trajectory Aiming Line)
             ctx.save();
             ctx.setLineDash([4, 6]);
-            ctx.strokeStyle = 'rgba(0, 245, 212, 0.5)';
+            ctx.strokeStyle = 'rgba(0, 245, 212, 0.55)';
             ctx.lineWidth = 1.5;
             ctx.beginPath();
             ctx.moveTo(ball.x, ball.y - ball.radius);
@@ -1548,17 +1824,11 @@ function draw() {
                         ball.dx = currentSpeed * Math.sin(bounceAngle);
                         ball.dy = -currentSpeed * Math.cos(bounceAngle);
                         
-                        if (Math.abs(ball.dx) < 1.5) ball.dx = ball.dx < 0 ? -1.5 : 1.5;
+                        if (Math.abs(ball.dx) < 1.2) ball.dx = ball.dx < 0 ? -1.2 : 1.2;
                         playCustomLevelSound('paddle');
                     }
                 }
             } 
-            if (warpGate && ball.x >= warpGate.x && ball.y >= warpGate.y && ball.y <= warpGate.y + warpGate.height) {
-                checkScoreMilestone(10000);
-                showNotice('🎉 成功跳關！ +10,000分', '#00f5d4');
-                gameOver(true);
-                return;
-            }
 
             if (ball.y + ball.dy > height - controlsAreaHeight - ball.radius) {
                 balls.splice(i, 1);
@@ -1576,11 +1846,11 @@ function draw() {
         hapticFeedback([50, 80, 50]);
 
         if (lives <= 0) {
-            gameOver(false);
+            showResultScreen(false);
             return;
         } else {
             showNotice(`💔 損失 1 命！ 剩餘 ${lives} 次`, '#ff0055');
-            resetBallAndPaddle();
+            resetBallAndPaddle(true);
         }
     }
 
