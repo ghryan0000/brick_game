@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>快打磚塊 - Mobile Fullscreen 4-Level Edition</title>
+    <title>快打磚塊 - Arkanoid Retro Mobile Deluxe</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -15,7 +15,7 @@
             -webkit-tap-highlight-color: transparent;
         }
         html, body {
-            background: #060713;
+            background: #04040c;
             margin: 0;
             padding: 0;
             width: 100vw;
@@ -37,7 +37,7 @@
             max-width: 480px;
             background: #000;
             overflow: hidden;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.95);
             display: flex;
             flex-direction: column;
         }
@@ -49,19 +49,33 @@
         }
         canvas {
             display: block;
-            background: radial-gradient(circle at center, #17153a 0%, #060515 100%);
+            background: radial-gradient(circle at center, #151336 0%, #04030f 100%);
             width: 100%;
             height: 100%;
         }
+
+        /* CRT 復古掃描線濾鏡特效 */
+        .crt-scanlines::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.04));
+            background-size: 100% 3px, 6px 100%;
+            pointer-events: none;
+            z-index: 8;
+        }
+
         #ui-header {
             position: absolute;
-            top: 12px;
-            left: 12px;
-            right: 12px;
+            top: 10px;
+            left: 10px;
+            right: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
             pointer-events: none;
@@ -71,12 +85,12 @@
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            padding: 5px 10px;
-            border-radius: 12px;
+            padding: 4px 8px;
+            border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.15);
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
         }
         .score-box span {
             color: #00d2ff;
@@ -84,19 +98,36 @@
         }
         .lives-box span {
             color: #ff006e;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
+            font-size: 11px;
         }
         #level-badge {
             background: linear-gradient(135deg, #ff006e, #8338ec);
             color: #fff;
-            padding: 5px 12px;
-            border-radius: 20px;
+            padding: 4px 10px;
+            border-radius: 16px;
             font-weight: 800;
-            font-size: 13px;
-            box-shadow: 0 0 15px rgba(255, 0, 110, 0.4);
+            font-size: 12px;
+            box-shadow: 0 0 12px rgba(255, 0, 110, 0.4);
+        }
+        #crt-btn {
+            pointer-events: auto;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #aaa;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+        #crt-btn.active {
+            color: #00f5d4;
+            border-color: #00f5d4;
+            box-shadow: 0 0 8px rgba(0, 245, 212, 0.4);
         }
 
-        /* 底部控制區域 (左右按鈕靠螢幕兩邊) */
+        /* 底部控制區域 (左右按鈕靠邊) */
         #controls {
             position: absolute;
             bottom: 0;
@@ -106,13 +137,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px 15px 20px;
+            padding: 0 18px 15px 18px;
             pointer-events: none;
             z-index: 5;
         }
         .btn {
-            width: 72px;
-            height: 72px;
+            width: 70px;
+            height: 70px;
             background: rgba(255, 255, 255, 0.12);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -121,7 +152,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 32px;
+            font-size: 30px;
             color: #fff;
             box-shadow: 0 8px 25px rgba(0,0,0,0.5), 0 0 15px rgba(0, 210, 255, 0.2);
             cursor: pointer;
@@ -135,6 +166,47 @@
             box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
         }
 
+        /* 特殊雷射與發射按鈕 (出現於右下上方) */
+        #action-btn {
+            position: absolute;
+            bottom: 95px;
+            right: 20px;
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #ff006e, #fb5607);
+            border: 2px solid #fff;
+            border-radius: 25px;
+            color: #fff;
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.6);
+            display: none;
+            cursor: pointer;
+            pointer-events: auto;
+            z-index: 6;
+            animation: pulse-btn 0.8s infinite alternate;
+        }
+        @keyframes pulse-btn {
+            0% { transform: scale(0.95); box-shadow: 0 0 10px rgba(255, 0, 110, 0.5); }
+            100% { transform: scale(1.05); box-shadow: 0 0 25px rgba(255, 0, 110, 0.9); }
+        }
+
+        /* 浮動通知提示 (加命/道具/連擊) */
+        #floating-notice {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 22px;
+            font-weight: 800;
+            color: #00f5d4;
+            text-shadow: 0 0 15px rgba(0, 245, 212, 0.8);
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 7;
+            text-align: center;
+        }
+
         /* Overlay 選單與關卡選擇畫面 */
         #overlay {
             position: absolute;
@@ -142,7 +214,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(6, 7, 19, 0.92);
+            background: rgba(4, 4, 15, 0.94);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             display: flex;
@@ -150,11 +222,11 @@
             justify-content: center;
             align-items: center;
             z-index: 10;
-            padding: 20px;
+            padding: 16px;
             text-align: center;
         }
         #overlay h1 {
-            font-size: 36px;
+            font-size: 34px;
             font-weight: 800;
             margin: 0 0 4px 0;
             background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
@@ -163,24 +235,24 @@
             text-shadow: 0 0 25px rgba(0, 210, 255, 0.4);
         }
         #overlay p {
-            font-size: 14px;
+            font-size: 13px;
             color: #a0a5c0;
-            margin: 0 0 18px 0;
+            margin: 0 0 14px 0;
             line-height: 1.4;
         }
         .level-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
             max-width: 320px;
-            margin-bottom: 18px;
+            margin-bottom: 14px;
         }
         .level-card {
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 14px;
-            padding: 12px 8px;
+            border-radius: 12px;
+            padding: 10px 6px;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
@@ -194,21 +266,21 @@
             box-shadow: 0 5px 20px rgba(0, 210, 255, 0.3);
         }
         .level-card .lvl-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 800;
             color: #fff;
         }
         .level-card .lvl-desc {
-            font-size: 11px;
+            font-size: 10px;
             color: #8fa0c5;
-            margin-top: 4px;
+            margin-top: 3px;
         }
         .start-btn {
             background: linear-gradient(135deg, #00d2ff 0%, #0072ff 100%);
             color: #fff;
             border: none;
-            padding: 13px 38px;
-            font-size: 18px;
+            padding: 12px 36px;
+            font-size: 17px;
             font-weight: 700;
             border-radius: 30px;
             cursor: pointer;
@@ -220,43 +292,46 @@
             box-shadow: 0 12px 30px rgba(0, 210, 255, 0.6);
         }
         .stats-summary {
-            font-size: 17px;
+            font-size: 16px;
             font-weight: 600;
             color: #ffffff;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
     </style>
 </head>
 <body>
 
 <div id="game-container">
+    <div id="floating-notice"></div>
+
     <div id="ui-header">
         <div class="score-box">分數: <span id="score">0</span></div>
         <div class="score-box lives-box">生命: <span id="lives">❤️❤️❤️</span></div>
         <div id="level-badge">關卡 1</div>
-        <div class="score-box">最高分: <span id="highscore">0</span></div>
+        <div class="score-box" id="highscore-box" style="cursor: pointer;">最高: <span id="highscore">0</span></div>
+        <button id="crt-btn">CRT 濾鏡</button>
     </div>
     
     <div id="overlay">
         <h1 id="overlay-title">快打磚塊</h1>
-        <p id="overlay-desc">選擇關卡體驗獨特玩法與專屬音效<br><span style="font-size: 12px; color: #787f9d;">(每場遊戲具備 3 次生命值 ❤️❤️❤️)</span></p>
+        <p id="overlay-desc">包含 7 款經典道具膠囊、飛行小兵與 DOH 魔王大戰<br><span style="font-size: 11px; color: #787f9d;">(每場新遊戲具備 3 次生命值 ❤️❤️❤️)</span></p>
         
         <div class="level-grid" id="level-selector">
             <div class="level-card selected" data-level="1">
                 <div class="lvl-title">LV 1. 經典初階</div>
-                <div class="lvl-desc">標準彩磚 / 溫和節奏</div>
+                <div class="lvl-desc">標準彩磚 / 道具掉落</div>
             </div>
             <div class="level-card" data-level="2">
-                <div class="lvl-title">LV 2. 疾速雙擊</div>
-                <div class="lvl-desc">強化磚塊 / 疾速球速</div>
+                <div class="lvl-title">LV 2. 疾速衝刺</div>
+                <div class="lvl-desc">強化粉磚 / 飛行小兵</div>
             </div>
             <div class="level-card" data-level="3">
                 <div class="lvl-title">LV 3. 障礙爆破</div>
-                <div class="lvl-desc">鋼鐵障礙 / 炸彈連爆</div>
+                <div class="lvl-desc">鋼鐵障礙 / 炸彈連鎖</div>
             </div>
             <div class="level-card" data-level="4">
                 <div class="lvl-title">LV 4. 魔王大戰</div>
-                <div class="lvl-desc">移動 BOSS / 血條機制</div>
+                <div class="lvl-desc">DOH 摩艾魔王 / 雙彈幕</div>
             </div>
         </div>
 
@@ -266,6 +341,9 @@
 
     <canvas id="gameCanvas"></canvas>
     
+    <!-- 額外雷射發射/放球鍵 -->
+    <div id="action-btn">🔥 發射雷射</div>
+
     <!-- 左右控制按鈕 (分立螢幕右下與左下) -->
     <div id="controls">
         <div class="btn" id="leftBtn">←</div>
@@ -274,17 +352,22 @@
 </div>
 
 <script>
+const container = document.getElementById('game-container');
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const livesEl = document.getElementById('lives');
 const highscoreEl = document.getElementById('highscore');
+const highscoreBox = document.getElementById('highscore-box');
 const levelBadge = document.getElementById('level-badge');
+const crtBtn = document.getElementById('crt-btn');
+const floatingNotice = document.getElementById('floating-notice');
 const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayDesc = document.getElementById('overlay-desc');
 const overlayStats = document.getElementById('overlay-stats');
 const startBtn = document.getElementById('start-button');
+const actionBtn = document.getElementById('action-btn');
 const leftBtn = document.getElementById('leftBtn');
 const rightBtn = document.getElementById('rightBtn');
 const levelCards = document.querySelectorAll('.level-card');
@@ -298,8 +381,42 @@ let dpr = window.devicePixelRatio || 1;
 let width = 0;
 let height = 0;
 
-// 控制區高度 (確保擋板底部高於按鈕)
 const controlsAreaHeight = 100;
+
+// CRT 街機濾鏡切換
+crtBtn.addEventListener('click', () => {
+    container.classList.toggle('crt-scanlines');
+    crtBtn.classList.toggle('active');
+    hapticFeedback(15);
+});
+
+// 隱藏彩蛋：點擊最高分 5 次原地接關 (Secret Continue Cheat)
+let secretClickCount = 0;
+highscoreBox.addEventListener('click', () => {
+    secretClickCount++;
+    if (secretClickCount >= 5) {
+        secretClickCount = 0;
+        showNotice('🔓 隱藏接關已解鎖！', '#00f5d4');
+        playSound(880, 'sine', 0.3, 0.2);
+    }
+});
+
+function showNotice(text, color = '#00f5d4') {
+    floatingNotice.innerText = text;
+    floatingNotice.style.color = color;
+    floatingNotice.style.opacity = '1';
+    floatingNotice.style.transform = 'translate(-50%, -60%) scale(1.1)';
+    setTimeout(() => {
+        floatingNotice.style.opacity = '0';
+        floatingNotice.style.transform = 'translate(-50%, -50%) scale(1)';
+    }, 1200);
+}
+
+function hapticFeedback(pattern) {
+    if (navigator.vibrate) {
+        try { navigator.vibrate(pattern); } catch(e){}
+    }
+}
 
 function resize() {
     const rect = canvas.getBoundingClientRect();
@@ -307,11 +424,8 @@ function resize() {
     height = rect.height;
     canvas.width = width * dpr;
     canvas.height = height * dpr;
-    if (ctx.resetTransform) {
-        ctx.resetTransform();
-    } else {
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-    }
+    if (ctx.resetTransform) ctx.resetTransform();
+    else ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
 
     if (paddle) {
@@ -323,7 +437,7 @@ function resize() {
 }
 window.addEventListener('resize', resize);
 
-// 音效引擎 (Web Audio API - 專屬關卡音效)
+// Web Audio API
 let audioCtx = null;
 function initAudio() {
     if (!audioCtx) {
@@ -357,8 +471,13 @@ function playCustomLevelSound(soundType) {
         else if (currentLevel === 2) playSound(850, 'square', 0.06, 0.1);
         else if (currentLevel === 3) playSound(450, 'triangle', 0.1, 0.15);
         else if (currentLevel === 4) playSound(350, 'sawtooth', 0.08, 0.12);
+    } else if (soundType === 'powerup') {
+        playSound(900, 'sine', 0.15, 0.18);
+        setTimeout(() => playSound(1200, 'sine', 0.2, 0.18), 100);
+    } else if (soundType === 'laser') {
+        playSound(1100, 'sawtooth', 0.08, 0.15);
     } else if (soundType === 'bomb') {
-        playSound(120, 'sawtooth', 0.3, 0.25);
+        playSound(120, 'sawtooth', 0.35, 0.25);
     } else if (soundType === 'steel') {
         playSound(200, 'square', 0.05, 0.1);
     } else if (soundType === 'bossHit') {
@@ -369,18 +488,41 @@ function playCustomLevelSound(soundType) {
         playSound(320, 'triangle', 0.05, 0.08);
     } else if (soundType === 'lifeLost') {
         playSound(160, 'sawtooth', 0.25, 0.2);
+    } else if (soundType === '1up') {
+        playSound(523, 'sine', 0.1, 0.2);
+        setTimeout(() => playSound(659, 'sine', 0.1, 0.2), 100);
+        setTimeout(() => playSound(784, 'sine', 0.25, 0.2), 200);
     }
 }
 
-// 遊戲變數
-let ball = { x: 0, y: 0, radius: 8, dx: 4, dy: -4, speed: 6 };
-let paddle = { width: 80, height: 12, x: 0, y: 0, color: '#00d2ff', speed: 8 };
+// 遊戲狀態物件
+let balls = [];
+let paddle = { 
+    width: 80, 
+    baseWidth: 80, 
+    height: 12, 
+    x: 0, 
+    y: 0, 
+    color: '#00d2ff', 
+    speed: 8,
+    laserMode: false,
+    catchMode: false,
+    expandTimer: null
+};
 let bricks = [];
 let particles = [];
+let capsules = [];
+let lasers = [];
+let enemies = [];
+let enemyTimer = null;
 let boss = null;
+let bossProjectiles = [];
+let warpGate = null;
 
 let lives = 3;
 let score = 0;
+let nextLifeScore = 20000;
+let comboStreak = 0;
 let gameRunning = false;
 let animationId = null;
 
@@ -389,10 +531,10 @@ let brickColumnCount = 5;
 let brickWidth = 0;
 let brickHeight = 20;
 let brickPadding = 8;
-let brickOffsetTop = 70;
+let brickOffsetTop = 65;
 let brickOffsetLeft = 15;
 
-// 關卡選擇卡片點擊
+// 關卡卡片點擊
 levelCards.forEach(card => {
     card.addEventListener('click', () => {
         levelCards.forEach(c => c.classList.remove('selected'));
@@ -404,8 +546,7 @@ levelCards.forEach(card => {
 function createParticles(x, y, color, count = 10) {
     for (let i = 0; i < count; i++) {
         particles.push({
-            x: x,
-            y: y,
+            x: x, y: y,
             dx: (Math.random() - 0.5) * 7,
             dy: (Math.random() - 0.5) * 7,
             radius: Math.random() * 3 + 1,
@@ -422,9 +563,8 @@ function updateParticles() {
         p.x += p.dx;
         p.y += p.dy;
         p.alpha -= 1 / p.life;
-        if (p.alpha <= 0) {
-            particles.splice(i, 1);
-        } else {
+        if (p.alpha <= 0) particles.splice(i, 1);
+        else {
             ctx.save();
             ctx.globalAlpha = Math.max(0, p.alpha);
             ctx.beginPath();
@@ -442,17 +582,142 @@ function updateLivesUI() {
     livesEl.innerText = hearts || '💀';
 }
 
-function resetBallAndPaddle() {
-    let baseSpeed = 5.5 + (currentLevel - 1) * 0.8;
-    ball.x = width / 2;
-    ball.y = height - controlsAreaHeight - 60;
-    let angle = (Math.random() * 0.6 - 0.3) * Math.PI;
-    ball.dx = baseSpeed * Math.sin(angle) || 3;
-    if (Math.abs(ball.dx) < 2) ball.dx = ball.dx < 0 ? -2 : 2;
-    ball.dy = -Math.abs(baseSpeed * Math.cos(angle));
-
-    paddle.x = (width - paddle.width) / 2;
+function checkScoreMilestone(added) {
+    score += added;
+    scoreEl.innerText = score;
+    if (score >= nextLifeScore) {
+        lives++;
+        updateLivesUI();
+        showNotice('+1 額外生命 ❤️ (達成里程碑)', '#ff006e');
+        playCustomLevelSound('1up');
+        hapticFeedback([50, 80, 50]);
+        nextLifeScore += nextLifeScore === 20000 ? 40000 : 60000;
+    }
 }
+
+function createBall(isMain = false) {
+    let baseSpeed = 5.5 + (currentLevel - 1) * 0.8;
+    let angle = (Math.random() * 0.6 - 0.3) * Math.PI;
+    return {
+        x: width / 2,
+        y: height - controlsAreaHeight - 60,
+        radius: 7.5,
+        dx: baseSpeed * Math.sin(angle) || 3,
+        dy: -Math.abs(baseSpeed * Math.cos(angle)),
+        speed: baseSpeed,
+        stuck: false,
+        stuckOffset: 0
+    };
+}
+
+function resetBallAndPaddle() {
+    balls = [createBall(true)];
+    paddle.x = (width - paddle.width) / 2;
+    paddle.laserMode = false;
+    paddle.catchMode = false;
+    actionBtn.style.display = 'none';
+    warpGate = null;
+}
+
+// 道具膠囊掉落系統 (L, E, C, D, S, B, P)
+const CAPSULE_TYPES = [
+    { type: 'L', letter: 'L', color: '#ff5400', label: '雷射砲 (Laser)' },
+    { type: 'E', letter: 'E', color: '#3a86ff', label: '擴大板 (Expand)' },
+    { type: 'C', letter: 'C', color: '#00f5d4', label: '黏球磁力 (Catch)' },
+    { type: 'D', letter: 'D', color: '#00d2ff', label: '三球分裂 (Disrupt)' },
+    { type: 'S', letter: 'S', color: '#ffbe0b', label: '減速球 (Slow)' },
+    { type: 'B', letter: 'B', color: '#ff006e', label: '跳關門 (Break)' },
+    { type: 'P', letter: 'P', color: '#a0aec0', label: '+1 生命 (1UP)' }
+];
+
+function spawnCapsule(x, y) {
+    if (Math.random() > 0.28) return; // 28% 掉落機率
+    let item = CAPSULE_TYPES[Math.floor(Math.random() * CAPSULE_TYPES.length)];
+    capsules.push({
+        x: x, y: y,
+        width: 32, height: 16,
+        type: item.type,
+        letter: item.letter,
+        color: item.color,
+        label: item.label,
+        dy: 2.2
+    });
+}
+
+function applyPowerup(type, label) {
+    playCustomLevelSound('powerup');
+    hapticFeedback(30);
+    showNotice(`✨ ${label}`, '#00d2ff');
+
+    if (type === 'L') {
+        paddle.laserMode = true;
+        actionBtn.innerText = '🔥 發射雷射';
+        actionBtn.style.display = 'block';
+    } else if (type === 'E') {
+        paddle.width = paddle.baseWidth * 1.5;
+        if (paddle.expandTimer) clearTimeout(paddle.expandTimer);
+        paddle.expandTimer = setTimeout(() => { paddle.width = paddle.baseWidth; }, 18000);
+    } else if (type === 'C') {
+        paddle.catchMode = true;
+        showNotice('🧲 磁力黏球啟用', '#00f5d4');
+    } else if (type === 'D') {
+        if (balls.length > 0) {
+            let b = balls[0];
+            balls.push({ ...b, dx: b.dx - 2.5, dy: -Math.abs(b.dy), stuck: false });
+            balls.push({ ...b, dx: b.dx + 2.5, dy: -Math.abs(b.dy), stuck: false });
+        }
+    } else if (type === 'S') {
+        balls.forEach(b => {
+            b.dx = (b.dx > 0 ? 1 : -1) * 3.5;
+            b.dy = (b.dy > 0 ? 1 : -1) * 3.5;
+        });
+    } else if (type === 'B') {
+        warpGate = { x: width - 25, y: height / 2 - 40, width: 25, height: 80 };
+        showNotice('🚪 右側傳送門已開啟！', '#ff006e');
+    } else if (type === 'P') {
+        lives++;
+        updateLivesUI();
+        playCustomLevelSound('1up');
+    }
+}
+
+// 飛行小兵生成 (Roaming Enemies)
+function spawnEnemy() {
+    if (!gameRunning || currentLevel === 1) return;
+    enemies.push({
+        x: Math.random() * (width - 40) + 20,
+        y: 60,
+        radius: 12,
+        angle: 0,
+        speed: 1.2,
+        color: '#ffbe0b',
+        hp: 1
+    });
+}
+
+function fireLaser() {
+    if (!paddle.laserMode || !gameRunning) return;
+    lasers.push({ x: paddle.x + 8, y: paddle.y - 8, dy: -9, width: 3, height: 12 });
+    lasers.push({ x: paddle.x + paddle.width - 11, y: paddle.y - 8, dy: -9, width: 3, height: 12 });
+    playCustomLevelSound('laser');
+    hapticFeedback(12);
+}
+
+function releaseStuckBalls() {
+    balls.forEach(b => {
+        if (b.stuck) {
+            b.stuck = false;
+            b.dy = -Math.abs(b.speed || 5);
+        }
+    });
+    actionBtn.style.display = paddle.laserMode ? 'block' : 'none';
+}
+
+actionBtn.addEventListener('click', () => {
+    initAudio();
+    if (paddle.laserMode) fireLaser();
+    releaseStuckBalls();
+});
 
 function initGame() {
     currentLevel = selectedLevel;
@@ -461,8 +726,11 @@ function initGame() {
     
     lives = 3;
     updateLivesUI();
+    nextLifeScore = 20000;
+    comboStreak = 0;
 
-    paddle.width = Math.max(65, Math.min(85, width * 0.22));
+    paddle.baseWidth = Math.max(65, Math.min(85, width * 0.22));
+    paddle.width = paddle.baseWidth;
     paddle.y = height - controlsAreaHeight - paddle.height - 15;
     
     resetBallAndPaddle();
@@ -473,21 +741,30 @@ function initGame() {
     
     bricks = [];
     boss = null;
+    capsules = [];
+    lasers = [];
+    enemies = [];
+    bossProjectiles = [];
+    warpGate = null;
+
+    if (enemyTimer) clearInterval(enemyTimer);
+    enemyTimer = setInterval(spawnEnemy, 12000);
+
     const colors = ['#ff006e', '#fb5607', '#ffbe0b', '#3a86ff', '#8338ec', '#00f5d4'];
     
     if (currentLevel === 4) {
-        // Level 4: 魔王大戰 (Boss Ship + Health Bar)
+        // Level 4: DOH 摩艾魔王戰
         boss = {
             x: width / 2 - 60,
-            y: 70,
+            y: 65,
             width: 120,
-            height: 32,
-            hp: 20,
-            maxHp: 20,
-            dx: 2.5,
+            height: 38,
+            hp: 25,
+            maxHp: 25,
+            dx: 2.2,
+            shootTimer: 0,
             color: '#ff0055'
         };
-        // Mini shield bricks
         for (let c = 0; c < brickColumnCount; c++) {
             bricks[c] = [];
             for (let r = 0; r < 2; r++) {
@@ -497,7 +774,8 @@ function initGame() {
                     status: 1,
                     type: 'normal',
                     hp: 1,
-                    color: '#8338ec'
+                    color: '#8338ec',
+                    scoreVal: 100
                 };
             }
         }
@@ -508,22 +786,21 @@ function initGame() {
                 let type = 'normal';
                 let hp = 1;
                 let color = colors[r % colors.length];
+                let scoreVal = 50 + r * 10;
 
-                if (currentLevel === 2) {
-                    // Level 2: 強化磚塊 (需打兩次)
-                    if (r === 0 || r === 1) {
-                        type = 'tough';
-                        hp = 2;
-                        color = '#ff006e';
-                    }
+                if (currentLevel === 2 && (r === 0 || r === 1)) {
+                    type = 'tough';
+                    hp = 2;
+                    color = '#ff006e';
+                    scoreVal = 150;
                 } else if (currentLevel === 3) {
-                    // Level 3: 鋼鐵磚與炸彈磚
                     if (r === 2 && (c === 1 || c === 3)) {
                         type = 'steel';
                         color = '#718096';
                     } else if (r === 1 && c === 2) {
                         type = 'bomb';
                         color = '#ffbe0b';
+                        scoreVal = 200;
                     }
                 }
 
@@ -533,7 +810,8 @@ function initGame() {
                     status: 1,
                     type: type,
                     hp: hp,
-                    color: color
+                    color: color,
+                    scoreVal: scoreVal
                 };
             }
         }
@@ -544,7 +822,7 @@ function initGame() {
     particles = [];
 }
 
-// 按鈕雙重控制能力：點擊（微移一步）與長按（連續移動）
+// 觸控雙重控制：微移單步與長按連續滑動
 const keys = {};
 let tapStep = 22;
 
@@ -571,7 +849,6 @@ function handleButtonUp(dir) {
     }
 }
 
-// 觸控與滑鼠事件
 leftBtn.addEventListener('touchstart', (e) => { e.preventDefault(); handleButtonDown('left'); });
 leftBtn.addEventListener('touchend', (e) => { e.preventDefault(); handleButtonUp('left'); });
 leftBtn.addEventListener('touchcancel', (e) => { e.preventDefault(); handleButtonUp('left'); });
@@ -589,21 +866,23 @@ rightBtn.addEventListener('mouseup', () => handleButtonUp('right'));
 rightBtn.addEventListener('mouseleave', () => handleButtonUp('right'));
 
 window.addEventListener('keydown', (e) => {
-    if (['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'].includes(e.code)) {
-        keys[e.code] = true;
+    if (['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'].includes(e.code)) keys[e.code] = true;
+    if (e.code === 'Space') {
+        if (paddle.laserMode) fireLaser();
+        releaseStuckBalls();
     }
 });
 window.addEventListener('keyup', (e) => {
-    if (['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'].includes(e.code)) {
-        keys[e.code] = false;
-    }
+    if (['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'].includes(e.code)) keys[e.code] = false;
 });
 
+// Canvas 手勢滑動
 let isDragging = false;
 canvas.addEventListener('touchstart', (e) => {
     if (!gameRunning) return;
     isDragging = true;
     movePaddleWithTouch(e.touches[0].clientX);
+    releaseStuckBalls();
 }, { passive: true });
 
 canvas.addEventListener('touchmove', (e) => {
@@ -639,6 +918,8 @@ function gameOver(isWin) {
         cancelAnimationFrame(animationId);
         animationId = null;
     }
+    if (enemyTimer) clearInterval(enemyTimer);
+
     if (score > highscore) {
         highscore = score;
         localStorage.setItem('brick_highscore', highscore);
@@ -670,40 +951,43 @@ function gameOver(isWin) {
 
 function triggerBombExplosion(centerC, centerR) {
     playCustomLevelSound('bomb');
+    hapticFeedback([40, 60, 40]);
     for (let c = Math.max(0, centerC - 1); c <= Math.min(brickColumnCount - 1, centerC + 1); c++) {
         if (!bricks[c]) continue;
         for (let r = Math.max(0, centerR - 1); r <= Math.min(brickRowCount - 1, centerR + 1); r++) {
             let target = bricks[c][r];
             if (target && target.status === 1 && target.type !== 'steel') {
                 target.status = 0;
-                score += 15;
+                checkScoreMilestone(25);
                 createParticles(target.x + brickWidth / 2, target.y + brickHeight / 2, '#ffbe0b', 15);
             }
         }
     }
-    scoreEl.innerText = score;
 }
 
 function collisionDetection() {
     let activeBreakables = 0;
 
-    // Boss Collision (Level 4)
+    // Boss 碰撞
     if (boss && boss.hp > 0) {
-        if (ball.x + ball.radius > boss.x && ball.x - ball.radius < boss.x + boss.width &&
-            ball.y + ball.radius > boss.y && ball.y - ball.radius < boss.y + boss.height) {
-            ball.dy = -ball.dy;
-            boss.hp--;
-            score += 20;
-            scoreEl.innerText = score;
-            createParticles(ball.x, ball.y, '#ff0055', 12);
-            playCustomLevelSound('bossHit');
-            if (boss.hp <= 0) {
-                gameOver(true);
-                return;
+        balls.forEach(ball => {
+            if (ball.x + ball.radius > boss.x && ball.x - ball.radius < boss.x + boss.width &&
+                ball.y + ball.radius > boss.y && ball.y - ball.radius < boss.y + boss.height) {
+                ball.dy = -ball.dy;
+                boss.hp--;
+                checkScoreMilestone(200);
+                createParticles(ball.x, ball.y, '#ff0055', 12);
+                playCustomLevelSound('bossHit');
+                hapticFeedback(25);
+                if (boss.hp <= 0) {
+                    gameOver(true);
+                    return;
+                }
             }
-        }
+        });
     }
 
+    // 磚塊碰撞走查
     for (let c = 0; c < brickColumnCount; c++) {
         if (!bricks[c]) continue;
         for (let r = 0; r < brickRowCount; r++) {
@@ -711,36 +995,42 @@ function collisionDetection() {
             if (b && b.status === 1) {
                 if (b.type !== 'steel') activeBreakables++;
 
-                if (ball.x + ball.radius > b.x && ball.x - ball.radius < b.x + brickWidth && 
-                    ball.y + ball.radius > b.y && ball.y - ball.radius < b.y + brickHeight) {
-                    
-                    ball.dy = -ball.dy;
+                balls.forEach(ball => {
+                    if (ball.x + ball.radius > b.x && ball.x - ball.radius < b.x + brickWidth && 
+                        ball.y + ball.radius > b.y && ball.y - ball.radius < b.y + brickHeight) {
+                        
+                        ball.dy = -ball.dy;
 
-                    if (b.type === 'steel') {
-                        playCustomLevelSound('steel');
-                        createParticles(ball.x, ball.y, '#a0aec0', 5);
-                    } else if (b.type === 'bomb') {
-                        b.status = 0;
-                        triggerBombExplosion(c, r);
-                    } else {
-                        b.hp--;
-                        if (b.hp <= 0) {
+                        if (b.type === 'steel') {
+                            playCustomLevelSound('steel');
+                            createParticles(ball.x, ball.y, '#a0aec0', 5);
+                            hapticFeedback(10);
+                        } else if (b.type === 'bomb') {
                             b.status = 0;
-                            score += 10;
-                            scoreEl.innerText = score;
-                            createParticles(b.x + brickWidth / 2, b.y + brickHeight / 2, b.color);
-                            playCustomLevelSound('brick');
+                            triggerBombExplosion(c, r);
                         } else {
-                            b.color = '#ff66a5';
-                            playCustomLevelSound('brick');
+                            b.hp--;
+                            if (b.hp <= 0) {
+                                b.status = 0;
+                                comboStreak++;
+                                let comboBonus = comboStreak > 3 ? 1.5 : 1;
+                                checkScoreMilestone(Math.floor(b.scoreVal * comboBonus));
+                                createParticles(b.x + brickWidth / 2, b.y + brickHeight / 2, b.color);
+                                playCustomLevelSound('brick');
+                                hapticFeedback(12);
+                                spawnCapsule(b.x + brickWidth / 2, b.y + brickHeight / 2);
+                            } else {
+                                b.color = '#ff66a5'; // 裂痕變色
+                                playCustomLevelSound('brick');
+                            }
+                        }
+
+                        if (currentLevel !== 4 && activeBreakables - 1 <= 0) {
+                            gameOver(true);
+                            return;
                         }
                     }
-
-                    if (currentLevel !== 4 && activeBreakables - 1 <= 0) {
-                        gameOver(true);
-                        return;
-                    }
-                }
+                });
             }
         }
     }
@@ -750,30 +1040,66 @@ function draw() {
     if (!gameRunning) return;
     ctx.clearRect(0, 0, width, height);
 
-    if ((keys['ArrowLeft'] || keys['KeyA']) && paddle.x > 0) {
-        paddle.x -= paddle.speed;
-    }
-    if ((keys['ArrowRight'] || keys['KeyD']) && paddle.x < width - paddle.width) {
-        paddle.x += paddle.speed;
-    }
+    // 擋板移動
+    if ((keys['ArrowLeft'] || keys['KeyA']) && paddle.x > 0) paddle.x -= paddle.speed;
+    if ((keys['ArrowRight'] || keys['KeyD']) && paddle.x < width - paddle.width) paddle.x += paddle.speed;
 
-    // 繪製 Boss (Level 4)
+    // 繪製 Boss DOH
     if (boss && boss.hp > 0) {
         boss.x += boss.dx;
         if (boss.x + boss.width > width - 10 || boss.x < 10) boss.dx = -boss.dx;
 
+        // DOH 摩艾頭像造型
         ctx.save();
         ctx.fillStyle = boss.color;
         ctx.shadowColor = boss.color;
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 18;
         ctx.fillRect(boss.x, boss.y, boss.width, boss.height);
         
+        // 眼睛發光
+        ctx.fillStyle = '#00f5d4';
+        ctx.shadowColor = '#00f5d4';
+        ctx.fillRect(boss.x + 25, boss.y + 8, 14, 8);
+        ctx.fillRect(boss.x + boss.width - 39, boss.y + 8, 14, 8);
+
+        // Boss 血條
         let hpRatio = boss.hp / boss.maxHp;
         ctx.fillStyle = 'rgba(255,255,255,0.2)';
         ctx.fillRect(boss.x, boss.y - 12, boss.width, 6);
         ctx.fillStyle = '#00d2ff';
         ctx.fillRect(boss.x, boss.y - 12, boss.width * hpRatio, 6);
         ctx.restore();
+
+        // Boss 發射彈幕
+        boss.shootTimer++;
+        if (boss.shootTimer > 160) {
+            boss.shootTimer = 0;
+            bossProjectiles.push({ x: boss.x + 30, y: boss.y + boss.height, dy: 3.5, radius: 5 });
+            bossProjectiles.push({ x: boss.x + boss.width - 30, y: boss.y + boss.height, dy: 3.5, radius: 5 });
+            playSound(220, 'sawtooth', 0.1, 0.15);
+        }
+    }
+
+    // 更新與繪製 Boss 彈幕
+    for (let i = bossProjectiles.length - 1; i >= 0; i--) {
+        let p = bossProjectiles[i];
+        p.y += p.dy;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff0055';
+        ctx.shadowColor = '#ff0055';
+        ctx.shadowBlur = 10;
+        ctx.fill();
+
+        // 擊中擋板
+        if (p.y >= paddle.y && p.y <= paddle.y + paddle.height && p.x >= paddle.x && p.x <= paddle.x + paddle.width) {
+            bossProjectiles.splice(i, 1);
+            hapticFeedback([30, 40, 30]);
+            playCustomLevelSound('lifeLost');
+            showNotice('⚠️ 遭受魔王電漿打擊！', '#ff0055');
+        } else if (p.y > height) {
+            bossProjectiles.splice(i, 1);
+        }
     }
 
     // 繪製磚塊
@@ -811,9 +1137,115 @@ function draw() {
         }
     }
 
+    // 繪製傳送門 (Break Portal)
+    if (warpGate) {
+        ctx.save();
+        ctx.fillStyle = '#ff006e';
+        ctx.shadowColor = '#ff006e';
+        ctx.shadowBlur = 20;
+        ctx.fillRect(warpGate.x, warpGate.y, warpGate.width, warpGate.height);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.fillText('WARP', warpGate.x + 2, warpGate.y + 45);
+        ctx.restore();
+    }
+
+    // 更新與繪製道具膠囊
+    for (let i = capsules.length - 1; i >= 0; i--) {
+        let cap = capsules[i];
+        cap.y += cap.dy;
+        ctx.save();
+        ctx.fillStyle = cap.color;
+        ctx.shadowColor = cap.color;
+        ctx.shadowBlur = 10;
+        // 繪製圓角膠囊
+        ctx.beginPath();
+        ctx.roundRect(cap.x - cap.width/2, cap.y - cap.height/2, cap.width, cap.height, 8);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(cap.letter, cap.x, cap.y + 4);
+        ctx.restore();
+
+        // 擋板接住膠囊
+        if (cap.y + cap.height/2 >= paddle.y && cap.y - cap.height/2 <= paddle.y + paddle.height &&
+            cap.x >= paddle.x && cap.x <= paddle.x + paddle.width) {
+            applyPowerup(cap.type, cap.label);
+            capsules.splice(i, 1);
+        } else if (cap.y > height) {
+            capsules.splice(i, 1);
+        }
+    }
+
+    // 更新與繪製雷射光束
+    for (let i = lasers.length - 1; i >= 0; i--) {
+        let l = lasers[i];
+        l.y += l.dy;
+        ctx.fillStyle = '#ff006e';
+        ctx.shadowColor = '#ff006e';
+        ctx.shadowBlur = 10;
+        ctx.fillRect(l.x, l.y, l.width, l.height);
+
+        // 雷射擊中磚塊
+        for (let c = 0; c < brickColumnCount; c++) {
+            if (!bricks[c]) continue;
+            for (let r = 0; r < brickRowCount; r++) {
+                let b = bricks[c][r];
+                if (b && b.status === 1 && b.type !== 'steel') {
+                    if (l.x >= b.x && l.x <= b.x + brickWidth && l.y >= b.y && l.y <= b.y + brickHeight) {
+                        b.hp--;
+                        if (b.hp <= 0) {
+                            b.status = 0;
+                            checkScoreMilestone(b.scoreVal);
+                            createParticles(b.x + brickWidth/2, b.y + brickHeight/2, b.color);
+                            spawnCapsule(b.x + brickWidth/2, b.y + brickHeight/2);
+                        }
+                        lasers.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+        }
+        if (l.y < 0) lasers.splice(i, 1);
+    }
+
+    // 更新與繪製飛行小兵 (Roaming Enemies)
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        let en = enemies[i];
+        en.angle += 0.04;
+        en.y += en.speed;
+        en.x += Math.sin(en.angle) * 2;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(en.x, en.y, en.radius, 0, Math.PI * 2);
+        ctx.fillStyle = en.color;
+        ctx.shadowColor = en.color;
+        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.restore();
+
+        // 球擊中小兵
+        balls.forEach(ball => {
+            let dist = Math.hypot(ball.x - en.x, ball.y - en.y);
+            if (dist < ball.radius + en.radius) {
+                createParticles(en.x, en.y, en.color, 12);
+                checkScoreMilestone(100);
+                playSound(500, 'sine', 0.1);
+                hapticFeedback(15);
+                ball.dx = -ball.dx;
+                enemies.splice(i, 1);
+            }
+        });
+
+        if (en.y > height) enemies.splice(i, 1);
+    }
+
+    // 繪製粒子效果
     updateParticles();
 
-    // 繪製擋板
+    // 繪製擋板 (Vaus 飛船)
     ctx.save();
     ctx.beginPath();
     let px = paddle.x, py = paddle.y, pw = paddle.width, ph = paddle.height, prad = 6;
@@ -825,72 +1257,102 @@ function draw() {
     ctx.closePath();
     
     let paddleGradient = ctx.createLinearGradient(px, py, px + pw, py);
-    paddleGradient.addColorStop(0, '#00d2ff');
-    paddleGradient.addColorStop(1, '#0072ff');
+    paddleGradient.addColorStop(0, paddle.laserMode ? '#ff5400' : '#00d2ff');
+    paddleGradient.addColorStop(1, paddle.laserMode ? '#ff006e' : '#0072ff');
     ctx.fillStyle = paddleGradient;
-    ctx.shadowColor = '#00d2ff';
-    ctx.shadowBlur = 10;
-    ctx.fill();
-    ctx.restore();
-
-    // 繪製球體
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = '#ff006e';
-    ctx.shadowColor = '#ff006e';
+    ctx.shadowColor = paddle.laserMode ? '#ff5400' : '#00d2ff';
     ctx.shadowBlur = 12;
     ctx.fill();
-    ctx.closePath();
     ctx.restore();
 
-    // 牆壁碰撞
-    if (ball.x + ball.dx > width - ball.radius || ball.x + ball.dx < ball.radius) {
-        ball.dx = -ball.dx;
-        playCustomLevelSound('wall');
-    }
-    if (ball.y + ball.dy < ball.radius) {
-        ball.dy = -ball.dy;
-        playCustomLevelSound('wall');
-    } 
-    // 擋板碰撞
-    else if (ball.y + ball.dy >= paddle.y - ball.radius && ball.y <= paddle.y + paddle.height) {
-        if (ball.x >= paddle.x - ball.radius && ball.x <= paddle.x + paddle.width + ball.radius) {
-            ball.dy = -Math.abs(ball.dy);
-            
-            let collidePoint = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2);
-            let bounceAngle = collidePoint * (Math.PI / 3);
-            let currentSpeed = Math.hypot(ball.dx, ball.dy);
-            
-            ball.dx = currentSpeed * Math.sin(bounceAngle);
-            ball.dy = -currentSpeed * Math.cos(bounceAngle);
-            
-            if (Math.abs(ball.dx) < 1.5) {
-                ball.dx = ball.dx < 0 ? -1.5 : 1.5;
+    // 更新並繪製所有球體 (支援多球分裂)
+    for (let i = balls.length - 1; i >= 0; i--) {
+        let ball = balls[i];
+
+        if (ball.stuck) {
+            ball.x = paddle.x + ball.stuckOffset;
+            ball.y = paddle.y - ball.radius;
+        }
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff006e';
+        ctx.shadowColor = '#ff006e';
+        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.closePath();
+        ctx.restore();
+
+        if (!ball.stuck) {
+            // 牆壁碰撞
+            if (ball.x + ball.dx > width - ball.radius || ball.x + ball.dx < ball.radius) {
+                ball.dx = -ball.dx;
+                playCustomLevelSound('wall');
+            }
+            if (ball.y + ball.dy < ball.radius) {
+                ball.dy = -ball.dy;
+                playCustomLevelSound('wall');
+            } 
+            // 擋板碰撞
+            else if (ball.y + ball.dy >= paddle.y - ball.radius && ball.y <= paddle.y + paddle.height) {
+                if (ball.x >= paddle.x - ball.radius && ball.x <= paddle.x + paddle.width + ball.radius) {
+                    comboStreak = 0; // 重置連擊
+
+                    if (paddle.catchMode) {
+                        ball.stuck = true;
+                        ball.stuckOffset = ball.x - paddle.x;
+                        actionBtn.innerText = '🚀 發射彈珠';
+                        actionBtn.style.display = 'block';
+                    } else {
+                        ball.dy = -Math.abs(ball.dy);
+                        let collidePoint = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2);
+                        let bounceAngle = collidePoint * (Math.PI / 3);
+                        let currentSpeed = Math.hypot(ball.dx, ball.dy);
+                        
+                        ball.dx = currentSpeed * Math.sin(bounceAngle);
+                        ball.dy = -currentSpeed * Math.cos(bounceAngle);
+                        
+                        if (Math.abs(ball.dx) < 1.5) ball.dx = ball.dx < 0 ? -1.5 : 1.5;
+                        playCustomLevelSound('paddle');
+                    }
+                }
+            } 
+            // 傳送門過關判定
+            if (warpGate && ball.x >= warpGate.x && ball.y >= warpGate.y && ball.y <= warpGate.y + warpGate.height) {
+                checkScoreMilestone(10000);
+                showNotice('🎉 成功跳關！ +10,000分', '#00f5d4');
+                gameOver(true);
+                return;
             }
 
-            playCustomLevelSound('paddle');
+            // 底部掉落
+            if (ball.y + ball.dy > height - controlsAreaHeight - ball.radius) {
+                balls.splice(i, 1);
+            } else {
+                ball.x += ball.dx;
+                ball.y += ball.dy;
+            }
         }
-    } 
-    // 底部掉落 (扣減生命值)
-    else if (ball.y + ball.dy > height - controlsAreaHeight - ball.radius) {
+    }
+
+    // 所有球皆掉落時扣生命值
+    if (balls.length === 0) {
         lives--;
         updateLivesUI();
         playCustomLevelSound('lifeLost');
-        createParticles(ball.x, ball.y, '#ff006e', 15);
+        hapticFeedback([50, 80, 50]);
 
         if (lives <= 0) {
             gameOver(false);
             return;
         } else {
+            showNotice(`💔 損失 1 命！ 剩餘 ${lives} 次`, '#ff0055');
             resetBallAndPaddle();
         }
     }
 
     collisionDetection();
-
-    ball.x += ball.dx;
-    ball.y += ball.dy;
 
     if (gameRunning) {
         animationId = requestAnimationFrame(draw);
